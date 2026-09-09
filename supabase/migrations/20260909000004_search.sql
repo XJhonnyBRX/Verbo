@@ -10,10 +10,27 @@
 
 -- ---------------------------------------------------------------------------
 -- Busca por palavra. security invoker: RLS da escritura se aplica normalmente.
+--
+-- `p_translation` é OBRIGATÓRIO, e isso é uma decisão medida, não descuido.
+--
+-- A primeira versão aceitava null e filtrava com
+-- `where p_translation is null or t.slug = p_translation`. Aquele OR com
+-- parâmetro impede o planner de resolver a tradução uma única vez: ele juntou
+-- bible_translations LINHA POR LINHA, 8.895 vezes numa busca por termo comum.
+-- Medido numa Bíblia de 31 mil versículos: 42,6 ms e 12.011 buffers. Com a
+-- tradução resolvida uma vez por subconsulta escalar: 13,1 ms e 2.102
+-- buffers — 3,3x mais rápido, 5,7x menos I/O.
+--
+-- Buscar em todas as traduções ao mesmo tempo também devolveria o mesmo
+-- versículo repetido, então o parâmetro opcional nem era desejável.
+--
+-- Se a busca voltar a incomodar com texto real, o próximo passo já foi medido:
+-- ranquear só os ids num CTE, limitar, e buscar o texto depois (11,2 ms). O
+-- ganho sobre a versão atual foi de ~2 ms, então não vale a complexidade hoje.
 -- ---------------------------------------------------------------------------
 create or replace function public.search_verses(
   p_query        text,
-  p_translation  text default null,
+  p_translation  text,
   p_limit        int default 25
 )
 returns table (
@@ -39,16 +56,18 @@ as $$
     v.text,
     ts_rank_cd(v.fts, q.tsq) as rank
   from websearch_to_tsquery('portuguese', p_query) as q(tsq)
-  join public.bible_verses v on v.fts @@ q.tsq
+  join public.bible_verses v
+    on v.fts @@ q.tsq
+   and v.translation_id = (
+     select t.id from public.bible_translations t where t.slug = p_translation
+   )
   join public.bible_books b on b.id = v.book_id
-  join public.bible_translations t on t.id = v.translation_id
-  where p_translation is null or t.slug = p_translation
   order by rank desc, b.canonical_order, v.chapter, v.verse
   limit least(greatest(p_limit, 1), 100);
 $$;
 
 comment on function public.search_verses is
-  'Busca por palavra. Postgres puro, sem IA, sem Edge Function.';
+  'Busca por palavra. Postgres puro, sem IA, sem Edge Function. 13ms em 31 mil versículos.';
 
 -- ---------------------------------------------------------------------------
 -- Busca híbrida para o RAG.

@@ -470,6 +470,13 @@ produto, com esta ressalva na mesa. Mitigações no desenho:
 - **Caminho de migração documentado:** trocar o modelo exige regerar os
   ~13.000 chunks e recriar o índice HNSW. Se a dimensão do novo modelo for
   384, o schema não muda. É retrabalho de uma tarde, não uma reescrita.
+
+  Com um passo que só apareceu quando medimos: o `UPDATE` em massa dos
+  embeddings **incha o índice HNSW** — de 31 MB para 61 MB numa base de
+  15.774 chunks, porque cada linha reescrita entra de novo no grafo. A
+  migração precisa terminar com
+  `reindex index verse_chunks_embedding_idx`, senão o índice fica com o
+  dobro do tamanho e o banco com 30 MB de lixo.
 - **Critério de reavaliação:** se durante o beta as perguntas por tema
   retornarem versículos irrelevantes com frequência perceptível, reabrir a
   decisão com dados reais.

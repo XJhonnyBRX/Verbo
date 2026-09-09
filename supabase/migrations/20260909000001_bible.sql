@@ -63,15 +63,21 @@ create table public.bible_verses (
   constraint bible_verses_text_not_blank check (btrim(text) <> '')
 );
 
--- Leitura de capítulo: o acesso mais frequente do app inteiro.
-create index bible_verses_chapter_idx
-  on public.bible_verses (translation_id, book_id, chapter, verse);
+/* Leitura de capítulo — o acesso mais frequente do app inteiro — é servida
+   pelo índice da constraint `bible_verses_unique`, que já é
+   (translation_id, book_id, chapter, verse). Medido: 0,145 ms para um
+   capítulo de Salmos numa Bíblia de 31 mil versículos.
+
+   Um índice explícito com essas mesmas quatro colunas foi criado aqui e
+   depois removido: era duplicata exata da constraint, custava 1,2 MB e
+   dobrava a escrita nos 31 mil inserts da importação, sem ganho nenhum de
+   leitura. Não recrie. */
 
 -- Busca por palavra. Sem IA, sem Edge Function.
 create index bible_verses_fts_idx on public.bible_verses using gin (fts);
 
--- FK sem índice próprio: bible_verses_chapter_idx já cobre translation_id;
--- book_id precisa do seu, para as consultas que partem do livro.
+-- FK para bible_books, que a constraint unique não cobre (book_id não é a
+-- primeira coluna dela).
 create index bible_verses_book_id_idx on public.bible_verses (book_id);
 
 -- -------------------------------------------------------------------- chunks
