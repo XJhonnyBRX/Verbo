@@ -47,43 +47,54 @@ uso comercial exige Pro — decisão futura, não bloqueia o MVP.
 ## 3. Arquitetura
 
 ```
-Navegador (Next.js PWA)
+Cliente (Next.js PWA / futuro app Android)
         |
         +---- leitura, busca, favoritos, anotações
         |     supabase-js + RLS -> Postgres direto
         |     custo de IA: zero
         |
         +---- perguntas ao assistente
-              POST /api/ask  (Next.js apenas repassa o stream)
+              POST direto na Edge Function, com o JWT do usuário
                       |
                       v
           Edge Function `ask`  <-- única porta da IA
-              1. vetoriza a pergunta (gte-small, local)
-              2. hybrid_search no Postgres (RRF)
-              3. monta o contexto
-              4. Gemini Flash
-              5. VALIDA cada referência citada
-              6. stream de volta
+              1. checa limite diário e cache
+              2. vetoriza a pergunta (gte-small, local)
+              3. hybrid_search no Postgres (RRF)
+              4. monta o contexto
+              5. Gemini Flash
+              6. VALIDA cada referência citada
+              7. stream de volta
 ```
 
-O princípio: **IA não entra onde não precisa entrar.** Ler um capítulo,
-resolver "Jo 3:16", buscar a palavra "perdão", favoritar e anotar são
-operações de banco. Só a pergunta em linguagem natural custa dinheiro.
+Dois princípios governam esse desenho.
+
+**IA não entra onde não precisa entrar.** Ler um capítulo, resolver
+"Jo 3:16", buscar a palavra "perdão", favoritar e anotar são operações de
+banco. Só a pergunta em linguagem natural custa dinheiro.
+
+**Nenhuma lógica essencial vive no servidor do Next.** No Android não existe
+servidor Next.js: uma Route Handler essencial simplesmente não existiria
+dentro do app empacotado. Por isso o cliente fala direto com o Supabase e
+direto com a Edge Function, e o Next é casca mais PWA. Isso mantém três
+portas abertas sem retrabalho — PWA hoje, TWA na Play Store depois, e
+Capacitor (`output: 'export'`) se um dia Bíblia offline e notificação nativa
+justificarem virar nativo. Ver seção 10.
 
 ### Estrutura de pastas
 
 ```
 verbo/
 ├── app/                    # Next.js App Router
-│   ├── (leitura)/          # livros, capítulos, versículos
-│   ├── busca/
-│   ├── assistente/
-│   ├── conta/
-│   └── api/ask/            # proxy de streaming para a Edge Function
-├── components/
+│   ├── page.tsx            # índice do canon + abertura
+│   ├── biblia/[osis]/[chapter]/
+│   ├── buscar/
+│   ├── perguntar/
+│   └── conta/
+├── components/             # bottom-nav, anchor
 ├── lib/
-│   ├── bible/              # reference.ts, canon.ts, chunker.ts  <- funções puras
-│   ├── supabase/           # clients browser/server
+│   ├── bible/              # canon.ts, reference.ts, chunker.ts <- funções puras
+│   ├── supabase/           # clients
 │   └── types/              # gerados por `supabase gen types`
 ├── supabase/
 │   ├── migrations/         # SQL versionado
@@ -91,9 +102,15 @@ verbo/
 │   │   ├── ask/            # pipeline RAG completo
 │   │   └── embed-batch/    # geração em lote dos vetores
 │   └── tests/              # pgTAP
-├── scripts/import-bible.ts
+├── scripts/
+│   ├── import-bible.ts
+│   ├── verify-ui.mjs       # regra de ouro + contraste + overflow no navegador
+│   └── screenshot.mjs
 └── public/                 # manifest PWA, ícones
 ```
+
+Sem `app/api/`: qualquer coisa que morasse ali deixaria de existir no app
+Android.
 
 `lib/bible/` é o coração testável: sem banco, sem rede, sem IA. O parser de
 referência e o chunker são onde os bugs de verdade vão morar, e a regra de
@@ -333,6 +350,25 @@ Na saída da função:
 Todo descarte vira log. **A taxa de citação inventada é a métrica de
 credibilidade do VERBO** e deve ser olhada toda semana do beta.
 
+### O extrator devolve DUAS listas, e isso não é detalhe
+
+`extractCitations(texto)` devolve `{ references, rejected }`. A primeira
+versão devolvia só as referências válidas e engolia em silêncio o que não
+resolvia — e com isso apagava exatamente o número que precisa ser vigiado.
+A tela mostrava duas âncoras corretas e nenhum sinal de que uma terceira
+citação havia sido inventada. Pior: o teste unitário passava, porque
+codificava essa expectativa errada. Só a verificação no navegador pegou.
+
+A distinção que `rejected` faz importa:
+
+- **"Salmos 151:2"** — livro real, lugar inexistente. É citação inventada:
+  entra em `rejected` e conta na métrica.
+- **"Concílio 3:16"** — não é livro nenhum. É prosa que se parece com
+  referência: é ignorada, e contá-la inflaria a métrica com ruído.
+
+Regra derivada: nenhuma camada do VERBO pode descartar uma citação sem
+informar que descartou.
+
 ### Prompt
 
 O modelo recebe apenas os versículos recuperados e a instrução de citar
@@ -385,7 +421,18 @@ Mais três travas:
   validador, e ambas devem ser descartadas.
 - **Validação da importação** (seção 5) roda como teste, não como script
   manual.
-- **Playwright** nos fluxos de leitura e do assistente.
+- **`scripts/verify-ui.mjs`** roda o navegador de verdade e falha o build se
+  qualquer uma destas três regredir:
+  1. a regra de ouro na tela — citação inventada não vira âncora, e o
+     descarte é informado;
+  2. contraste do texto pequeno acima de 4,5:1, calculado por WCAG 2.1 nos
+     dois temas;
+  3. ausência de overflow horizontal em 390px.
+
+  A segunda existe porque `--gutter` era usado tanto para filetes de 0,5px
+  quanto para números de versículo de 11px, e essas duas coisas têm
+  exigências opostas: como cor de texto o cinza dava 2,3:1. Hoje `--gutter`
+  desenha linhas e `--label` escreve, e o verificador impede a regressão.
 
 ---
 
@@ -412,10 +459,24 @@ produto, com esta ressalva na mesa. Mitigações no desenho:
   retornarem versículos irrelevantes com frequência perceptível, reabrir a
   decisão com dados reais.
 
-**PWA no Android não é automático.** Publicar na Play Store exige empacotar
-numa Trusted Web Activity (Bubblewrap). Não é difícil, mas não é o passo
-direto que o diagrama original sugeria. No iOS, as limitações de PWA são
-consideravelmente maiores. Decisão para depois do beta.
+**Android: três portas, uma escolha adiada.** O diagrama original sugeria
+"Web → PWA → Android" como passo automático. Não é. Os caminhos reais:
+
+| Caminho | O que custa | O que dá |
+|---|---|---|
+| PWA instalável | nada além do manifest | instala do navegador, hoje |
+| TWA via Bubblewrap | um wrapper e a ficha na Play Store | presença na loja, sem tocar no código |
+| Capacitor | `output: 'export'` e telas 100% cliente | Bíblia offline, notificação, widget |
+
+A decisão fica para depois do beta, mas a **precondição** dela é atendida
+desde agora: nenhuma lógica essencial no servidor do Next. É o que torna o
+terceiro caminho uma tarde de trabalho em vez de uma reescrita. O motivo
+real para virar nativo num app bíblico é a leitura offline — a Escritura
+inteira cabe folgadamente no dispositivo, e quem lê Bíblia no ônibus não
+tem sinal.
+
+No iOS as limitações de PWA são consideravelmente maiores, e lá o Capacitor
+deixa de ser opcional.
 
 **Vercel Hobby não permite uso comercial.** Serve ao beta fechado. Se o VERBO
 virar produto pago, exige o plano Pro.

@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   VERBO — sistema de design
+
+   Aterrado na Bíblia de bolso brasileira: papel fino quase neutro (não creme),
+   tinta preta quente, e um único vermelho de impressor — o mesmo das edições
+   "letras vermelhas" e do corte tingido na borda das páginas. O vermelho faz
+   duas coisas, só duas: as falas de Cristo e as âncoras de referência.
+   Nada mais no app é vermelho.
+--------------------------------------------------------------------------- */
+
+:root {
+  --ink: #16130f;
+  --paper: #faf9f6;
+  --paper-deep: #efede7;
+  --rubric: #8e1d1d;
+
+  /* --gutter e --label eram a mesma cor, e não podiam ser: um filete de
+     0,5px e um número de 11px têm exigências de contraste opostas. Como cor
+     de texto, o cinza dos filetes dava 2,3:1 — os números de versículo
+     ficavam ilegíveis para baixa visão. Agora --gutter desenha linhas e
+     --label escreve, com 5:1 sobre o papel. */
+  --gutter: #a9a296;
+  --label: #6f675a;
+
+  --hairline: color-mix(in oklab, var(--gutter) 38%, transparent);
+  --ink-soft: color-mix(in oklab, var(--ink) 68%, var(--paper));
+}
+
+/* Leitura noturna é uso real e frequente num app bíblico, não enfeite. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #ece7df;
+    --paper: #14120f;
+    --paper-deep: #1e1b17;
+    --rubric: #e0524f;
+    --gutter: #6e675c;
+    --label: #9a9286;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ink: #ece7df;
+  --paper: #14120f;
+  --paper-deep: #1e1b17;
+  --rubric: #e0524f;
+  --gutter: #6e675c;
+  --label: #9a9286;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-rubric: var(--rubric);
+  --color-gutter: var(--gutter);
+  --color-label: var(--label);
+  --color-hairline: var(--hairline);
+
+  --font-scripture: var(--font-faustina), Georgia, "Times New Roman", serif;
+  --font-ui: var(--font-archivo), system-ui, -apple-system, sans-serif;
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  /* Barra inferior fixa: o conteúdo não pode terminar debaixo dela. */
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+
+/* ---------------------------------------------------------------------------
+   Escritura
+--------------------------------------------------------------------------- */
+
+.scripture {
+  font-family: var(--font-scripture), Georgia, serif;
+  font-size: 1.1875rem; /* 19px — Bíblia se lê por minutos, não por segundos */
+  line-height: 1.72;    /* serifa pede entrelinha mais generosa */
+  letter-spacing: 0.003em;
+  max-width: 36rem;     /* ~64 caracteres */
+  text-wrap: pretty;
+}
+
+/* O número do versículo pendurado na margem, como em Bíblia impressa.
+   No celular ele volta a ser sobrescrito inline, que é o que cabe. */
+.verse {
+  position: relative;
+  padding-block: 0.2rem;
+  scroll-margin-top: 5rem;
+}
+
+.verse-num {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--label);
+  vertical-align: 0.55em;
+  margin-inline-end: 0.35em;
+  user-select: none;
+}
+
+@media (min-width: 40rem) {
+  .verse-num {
+    position: absolute;
+    right: 100%;
+    top: 0.62rem;
+    margin-inline-end: 0;
+    padding-inline-end: 0.9rem;
+    vertical-align: baseline;
+    text-align: right;
+    min-width: 2.5rem;
+  }
+}
+
+/* Falas de Cristo. O primeiro dos dois únicos usos do vermelho. */
+.words-of-christ {
+  color: var(--rubric);
+}
+
+/* ---------------------------------------------------------------------------
+   Âncora — o objeto mais desenhado do VERBO
+
+   A referência não é um chip cinza de rodapé. É o versículo inteiro, no tipo
+   da Escritura, atrás de um filete vermelho. Um chip diz "confie em mim";
+   o versículo diz "confira".
+--------------------------------------------------------------------------- */
+
+.anchor {
+  border-inline-start: 2px solid var(--rubric);
+  padding-inline-start: 1rem;
+  padding-block: 0.125rem;
+}
+
+.anchor-ref {
+  font-family: var(--font-ui), system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--rubric);
+}
+
+.anchor-text {
+  font-family: var(--font-scripture), Georgia, serif;
+  font-size: 1.0625rem;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: 34rem;
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+   Acessibilidade
+--------------------------------------------------------------------------- */
+
+:focus-visible {
+  outline: 2px solid var(--rubric);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Único momento de movimento do app: a âncora aparecendo depois que a
+   resposta terminou de escrever. Movimento que responde a uma ação e
+   mostra o que mudou. */
+@keyframes anchor-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anchor-enter {
+  animation: anchor-in 320ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
