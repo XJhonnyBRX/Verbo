@@ -43,3 +43,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# arquivos-fonte de tradução: grandes, imutáveis, baixados por URL registrada
+# em docs/design/traducao.md. Não versionados.
+data/source/
