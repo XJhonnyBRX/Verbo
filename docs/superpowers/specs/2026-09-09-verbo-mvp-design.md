@@ -413,9 +413,24 @@ Mais três travas:
 - **Vitest** em `lib/bible/`: parser de referência (todas as formas da seção
   6), chunker, canon. TDD estrito — o parser é a peça de que a regra de ouro
   depende.
-- **pgTAP** em `supabase/tests/`: um usuário não lê a anotação de outro;
-  ninguém escreve em `bible_verses`; `hybrid_search` devolve resultados
-  ordenados corretamente.
+- **`npm run verify:schema`** sobe um Postgres 17 com pgvector no Docker, zera
+  o banco, aplica bootstrap e migrations na ordem e afirma 17 garantias:
+  tsvector em português, os três bloqueios de imutabilidade da Escritura,
+  `search_verses`, `resolve_passage` devolvendo vazio para referência
+  inventada, `hybrid_search` fundindo os ramos sem duplicar versículo por
+  sobreposição de chunk, **a referência inventada recusada por chave
+  estrangeira**, o perfil nascendo com o usuário, `updated_at` avançando
+  sozinho, RLS isolando anotações, `authenticated` lendo mas não escrevendo
+  na Escritura, e `verse_chunks` invisível ao cliente.
+
+  Uma armadilha registrada para quem for estender esse arquivo: `now()` é o
+  horário de **início da transação**, e um bloco `DO` é uma transação única.
+  Testar um trigger de `updated_at` dentro de um `DO` acusa falha inexistente
+  — `pg_sleep` não ajuda. Cada passo precisa ser uma instrução solta.
+
+  `scripts/db/00_bootstrap.sql` imita o que a Supabase fornece (`auth.users`,
+  `auth.uid()`, schema `extensions`, papéis) e nunca é aplicado num projeto
+  Supabase de verdade.
 - **Teste de integração da regra de ouro**: uma resposta contendo uma citação
   falsa ("Jo 5:99") e uma citação real que não estava no contexto passa pelo
   validador, e ambas devem ser descartadas.

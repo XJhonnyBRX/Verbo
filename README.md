@@ -39,11 +39,17 @@ npm run dev          # http://localhost:3000
 ## Verificação
 
 ```bash
-npm test             # 60 testes: canon, parser de referências, extração
-npm run build        # tipos + build de produção
-npm run verify:ui    # navegador de verdade — precisa do servidor rodando
-npm run shots -- <dir>   # capturas em claro e escuro, 390px
+npm test               # 60 testes: canon, parser de referências, extração
+npm run build          # tipos + build de produção
+npm run verify:schema  # Postgres real no Docker — 17 garantias do banco
+npm run verify:ui      # navegador de verdade — precisa do servidor rodando
+npm run shots -- <dir> # capturas em claro e escuro, 390px
 ```
+
+`verify:schema` sobe um pgvector no Docker, zera o banco, aplica bootstrap e
+migrations na ordem, e afirma as garantias do spec — incluindo a que importa
+mais: **inserir uma referência inventada em `ai_message_references` tem de
+falhar por violação de chave estrangeira.** Precisa do Docker Desktop aberto.
 
 `verify:ui` falha se qualquer uma destas regredir: a regra de ouro na tela,
 o contraste do texto pequeno (4,5:1 por WCAG nos dois temas), ou a ausência
@@ -55,7 +61,7 @@ de overflow horizontal em largura de celular.
 |---|---|
 | Sistema de design, PWA, quatro telas | funcionando |
 | Canon (66 livros) e parser de referências | 60 testes passando |
-| Migrations do Postgres | escritas, **não executadas** — falta subir um banco |
+| Migrations do Postgres | aplicadas e verificadas em Postgres 17 + pgvector, 17 garantias |
 | Edge Function `ask` | não existe; a tela usa demonstração fixa |
 | Auth, favoritos, anotações | Ciclo 3 |
 | Texto bíblico | **amostra descartável** — ver abaixo |
