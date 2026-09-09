@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "verify:ui": "node scripts/verify-ui.mjs",
     "shots": "node scripts/screenshot.mjs",
-    "verify:schema": "node scripts/db/verify-schema.mjs"
+    "verify:schema": "node scripts/db/verify-schema.mjs",
+    "gen:counts": "node scripts/import/gen-canon-counts.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
