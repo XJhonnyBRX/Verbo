@@ -2,7 +2,8 @@
 
 **Data:** 2026-09-09
 **Tarefa:** Ciclo 1, Tarefa 1
-**Status:** verificação concluída, decisão pendente de aprovação
+**Status:** **decidido e aprovado — A Bíblia Livre (BLIVRE)**, com a
+obrigação de atribuição aceita explicitamente pelo dono do produto.
 
 Tudo abaixo foi verificado baixando e contando os arquivos, não lendo
 descrições. Os comandos estão em `scripts/db/` e no histórico desta sessão.
@@ -211,7 +212,11 @@ Campos para `bible_translations`:
 | `license` | `Creative Commons Atribuição 3.0 Brasil (CC BY 3.0 BR)` |
 | `license_url` | `https://creativecommons.org/licenses/by/3.0/br/` |
 | `source_url` | `https://github.com/damarals/biblias/releases/download/v1.0.0/BLIVRE.json` |
-| `source_sha256` | calcular no download definitivo, dentro do importador |
+| `source_sha256` | `da55b0ce319524c97f105e1382d54c3bdda762ea4b9bc549b7c54ba23511cbab` |
+
+Arquivo baixado em 2026-09-09, 4.008.669 bytes. O importador recalcula o
+checksum e **grava o que calculou**, não este valor — assim uma troca
+silenciosa do arquivo na origem aparece como divergência em vez de passar.
 
 **Desvio a registrar:** a instrução original era «tradução de domínio
 público». CC BY 3.0 não é domínio público. Permite tudo que o VERBO precisa —

@@ -237,16 +237,32 @@ Arquivo oficial -> validação -> normalização -> importador
 - Nenhuma lacuna na numeração de capítulos ou versículos.
 - `verse_count` em `bible_translations` bate com o `count(*)` real.
 
-### Pendência aberta — primeira tarefa do Ciclo 1
+### A tradução — decidida
 
-**A tradução exata ainda não está decidida.** Candidatos conhecidos como
-domínio público em português: Almeida Revista e Corrigida 1911, Tradução
-Brasileira de 1917, e o projeto "A Bíblia Livre". Antes de escrever o
-importador é preciso verificar, para cada candidato: a situação real da
-licença, o formato disponível (JSON, XML, OSIS, SQL), a completude do texto
-e a qualidade da digitalização. O resultado dessa verificação, com as
-fontes, deve ser registrado neste documento antes que o importador seja
-escrito.
+**A Bíblia Livre (BLIVRE)**, licença Creative Commons Atribuição 3.0 Brasil,
+de Diego Santos, Mario Sérgio e Marco Teles. Verificação completa, com as
+contagens e as fontes, em
+[docs/design/traducao.md](../../design/traducao.md).
+
+O que a verificação apurou, contando os arquivos:
+
+- 66 livros, **exatamente 31.102 versículos**, nenhum vazio.
+- Ortografia moderna: `abysmo` e `elle` não aparecem nenhuma vez.
+- Versificação da família Almeida — a doxologia de Romanos em 16:25-27.
+- `source_sha256`: `da55b0ce319524c97f105e1382d54c3bdda762ea4b9bc549b7c54ba23511cbab`
+
+**Não é domínio público, e isso tem consequência de produto.** CC BY permite
+tudo que o VERBO precisa, uso comercial incluído, mas **a atribuição visível
+é condição da licença.** Se ela sair da interface, o uso deixa de ser
+licenciado. Por isso o crédito à tradução e aos autores entra no Ciclo 1, na
+mesma tarefa que liga as telas ao banco — não no Ciclo 6 junto com o polimento.
+
+As outras candidatas foram reprovadas por motivos que valem registro: a
+Almeida 1911 é domínio público mas usa ortografia pré-reforma, o que quebra a
+busca de forma mensurável (`elle` 4.089 vezes contra `ele` 1); a Tradução
+Brasileira não está em domínio público no Brasil; e o repositório
+`thiagobodruk/biblia`, o mais usado por desenvolvedores brasileiros, contém
+NVI, ACF e AA com todos os direitos reservados.
 
 ---
 
@@ -368,6 +384,33 @@ A distinção que `rejected` faz importa:
 
 Regra derivada: nenhuma camada do VERBO pode descartar uma citação sem
 informar que descartou.
+
+### A tradução escolhida pode transformar citação legítima em "inventada"
+
+Isto apareceu ao verificar as traduções candidatas e o spec não previa.
+
+A regra de ouro trata «a referência não resolve no banco» como «a IA
+inventou». Mas Bíblias divergem legitimamente entre si em duas coisas:
+**versificação** e **versículos omitidos por crítica textual**.
+
+O caso concreto que encontramos: a tradução BSL do eBible.org deixa Lucas
+17:36, Atos 8:37, Atos 15:34, Atos 24:7 e Romanos 16:25 sem texto — porque
+estão ausentes dos manuscritos mais antigos — e move a doxologia de Romanos
+de 16:25-27 para 14:24-26. Com aquele texto no banco, uma resposta citando
+Atos 8:37 seria acusada de alucinação pelo próprio VERBO, e uma citação de
+«Romanos 16:25-27» — que é como toda a literatura em português a escreve —
+também.
+
+A Bíblia Livre não tem nenhum desses problemas, então o MVP não sofre disso.
+Mas **no dia em que entrar uma segunda tradução, isso deixa de ser hipótese e
+passa a ser bug.** A saída é separar as duas perguntas que hoje estão
+fundidas numa:
+
+1. *Esta referência existe?* — decidido contra o **canon**, que é comum a
+   todas as traduções. É o que a validação da IA deve usar.
+2. *Esta tradução tem texto para ela?* — decidido contra `bible_verses`. Se
+   não tiver, a resposta correta ao usuário é «este versículo não consta
+   desta tradução», não «esta citação foi inventada».
 
 ### Prompt
 
