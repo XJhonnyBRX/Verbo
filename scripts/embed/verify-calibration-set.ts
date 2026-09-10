@@ -21,8 +21,8 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { adapt } from "../import/adapt-blivre";
 import { bookByOsis } from "../../lib/bible/canon";
+import { expectedVerseCount, TOTAL_VERSES } from "../../lib/bible/canon-counts";
 import { CALIBRACAO, type Papel } from "./calibration-set";
 import { CONSULTAS } from "./queries";
 
@@ -47,9 +47,20 @@ function normalizar(s: string): string {
 }
 
 // ────────────────────────────────────── 1. as referências existem mesmo
-const bible = adapt(readFileSync("data/source/BLIVRE.json", "utf8"));
-const existentes = new Set(bible.verses.map((v) => `${v.osis} ${v.c}:${v.v}`));
-console.log(`Bíblia importada: ${existentes.size.toLocaleString("pt-BR")} versículos\n`);
+/* CONTRA A TABELA VERSIONADA, e não contra data/source/BLIVRE.json.
+ *
+ * A primeira versão disto lia o arquivo da tradução — que está no .gitignore.
+ * Passava na minha máquina e quebrava no CI, que clona limpo. O CI existe
+ * justamente para pegar «funciona aqui», e pegou.
+ *
+ * VERSE_COUNTS é gerada da mesma BLIVRE, carrega o sha256 do arquivo de
+ * origem, e é suficiente: para saber se «Prov 6:6» existe basta o número de
+ * versículos de Provérbios 6. Melhor que a leitura anterior, aliás — não
+ * depende de um arquivo de 32 MB que o repositório deliberadamente não guarda.
+ */
+console.log(
+  `tabela canônica versionada: ${TOTAL_VERSES.toLocaleString("pt-BR")} versículos\n`,
+);
 
 const inexistentes: string[] = [];
 const foraDoCanon: string[] = [];
@@ -60,8 +71,11 @@ for (const c of CALIBRACAO) {
       foraDoCanon.push(`${c.id}: ${r}`);
       continue;
     }
-    if (!existentes.has(r)) inexistentes.push(`${c.id}: ${r}`);
-    void cv;
+    const [cap, ver] = cv.split(":").map(Number);
+    const total = expectedVerseCount(osis, cap);
+    if (total === undefined || ver < 1 || ver > total) {
+      inexistentes.push(`${c.id}: ${r}${total === undefined ? " (capítulo)" : ` (máx ${total})`}`);
+    }
   }
 }
 ok("todo livro citado existe no cânon", foraDoCanon.length === 0, foraDoCanon.join(", "));
