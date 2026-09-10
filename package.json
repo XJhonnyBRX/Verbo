@@ -17,6 +17,8 @@
     "import:bible": "tsx scripts/import/import-bible.ts"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "next": "16.3.4",
@@ -25,6 +27,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.1",
     "@huggingface/transformers": "^4.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.13.3",

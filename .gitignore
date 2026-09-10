@@ -50,3 +50,15 @@ data/source/
 
 # vetores gerados pelo benchmark de embeddings: grandes e reproduziveis
 data/vectors/
+
+# export estatico do Next para o Capacitor: gerado por VERBO_STATIC=1 npm run build
+/out/
+
+# saidas de build do Android (o projeto android/ em si e versionado)
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.keystore
+*.jks
