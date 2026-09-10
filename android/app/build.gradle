@@ -1,5 +1,21 @@
 apply plugin: 'com.android.application'
 
+/* Assinatura de upload.
+ *
+ * As credenciais vivem em android/keystore.properties, que esta no
+ * .gitignore junto com o proprio .jks. Nada de senha em arquivo versionado.
+ *
+ * Quando o arquivo nao existe -- clone limpo, CI sem segredo -- o build de
+ * release simplesmente nao assina, em vez de falhar. Assim `assembleDebug`
+ * continua funcionando para qualquer pessoa que clone o repositorio.
+ */
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def temAssinatura = keystorePropertiesFile.exists()
+if (temAssinatura) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "app.verbo.biblia"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,8 +32,22 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (temAssinatura) {
+            release {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (temAssinatura) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
