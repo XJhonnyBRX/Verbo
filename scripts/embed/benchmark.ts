@@ -55,8 +55,11 @@ interface Meta {
   modelo: string;
   dims: number;
   chunks: number;
-  segundos: number;
-  porSegundo: number;
+  /** null quando a execucao retomou um corpus ja completo e nao gerou nada. */
+  geracaoSegundos: number | null;
+  porSegundo: number | null;
+  vetoresGerados?: number;
+  nota?: string;
 }
 
 /* Simula o que o pgvector faria com halfvec. O ganho de espaço já é conhecido
@@ -310,16 +313,26 @@ function main(): void {
   );
 
   console.log("INFRAESTRUTURA");
-  console.log("modelo                                dims  chunks   tempo  ritmo | halfvec Δ nota");
+  console.log(
+    "modelo                                dims  chunks  geração  ritmo | halfvec Δ nota",
+  );
   console.log("-".repeat(92));
   for (const { meta, porVersao } of tudo) {
     const d = porVersao.v2.f16.nota - porVersao.v2.f32.nota;
+    // Travessão, nunca zero: uma execução que retomou corpus completo não
+    // gerou nada, e "0s" faria o modelo parecer instantâneo na comparação.
+    const tempo =
+      meta.geracaoSegundos === null ? "—" : `${meta.geracaoSegundos}s`;
+    const ritmo = meta.porSegundo === null ? "—" : `${meta.porSegundo}/s`;
     console.log(
       `${meta.modelo.padEnd(36)}  ${String(meta.dims).padStart(4)}  ` +
-        `${String(meta.chunks).padStart(6)}  ${String(meta.segundos + "s").padStart(6)} ` +
-        `${String(meta.porSegundo + "/s").padStart(6)} |      ` +
+        `${String(meta.chunks).padStart(6)}  ${tempo.padStart(7)} ` +
+        `${ritmo.padStart(6)} |      ` +
         `${d >= 0 ? "+" : ""}${(d * 100).toFixed(1)}pp`,
     );
+  }
+  for (const { meta } of tudo) {
+    if (meta.nota) console.log(`  ${meta.modelo}: ${meta.nota}`);
   }
 
   for (const { meta, porVersao } of tudo) {

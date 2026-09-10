@@ -5,9 +5,11 @@
       "dims": 384,
       "chunks": 15246,
       "consultas": 16,
-      "segundos": 1705,
       "porSegundo": 9,
-      "geradoEm": "2026-09-10T05:13:16.618Z"
+      "geradoEm": "2026-09-10T05:13:16.618Z",
+      "vetoresGerados": 15246,
+      "vetoresRetomados": 0,
+      "geracaoSegundos": 1705
     },
     "float32": {
       "versao": "v2-sem-vies",
@@ -340,6 +342,354 @@
           "topo": "Ps 109:21-23",
           "topoTexto": "Porém tu, Senhor DEUS, me trata bem por causa do teu nome; por ser boa a tua misericórdia, livra-me; Porque estou aflito e necessitado; e meu coração está ferido dentro de mim. Eu vou como a sombra, que declina; estou sendo sacudido como um gafanhoto.",
           "acertou": "Rom 12:17"
+        }
+      ]
+    }
+  },
+  {
+    "meta": {
+      "modelo": "Supabase/gte-small",
+      "dims": 384,
+      "chunks": 15246,
+      "consultas": 16,
+      "porSegundo": null,
+      "geradoEm": "2026-09-10T05:14:05.426Z",
+      "vetoresGerados": 0,
+      "vetoresRetomados": 15246,
+      "geracaoSegundos": null,
+      "nota": "corpus gerado pelo script anterior, que nao media o tempo de geracao. Ordem de grandeza observada: equivalente ao e5, cerca de 28 minutos. Nao registramos numero exato para nao inventar."
+    },
+    "float32": {
+      "versao": "v2-sem-vies",
+      "hit10": 0.375,
+      "mrr10": 0.25625,
+      "nota": 0.17124999999999999,
+      "porFamilia": {
+        "tema": {
+          "hit10": 0.6,
+          "mrr10": 0.41,
+          "n": 10
+        },
+        "parafrase": {
+          "hit10": 0,
+          "mrr10": 0,
+          "n": 6
+        }
+      },
+      "verdes": 5,
+      "amarelos": 1,
+      "vermelhos": 10,
+      "detalhe": [
+        {
+          "pergunta": "dinheiro e riqueza",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Eccl 5:9-11",
+          "topoTexto": "Mas o proveito da terra é para todos; até o rei se serve do campo. Aquele que amar o dinheiro, nunca se fartará de dinheiro; e quem amar a riqueza, nunca se fartará com seus bens; isto também é futilidade. Onde os bens se multiplicam, ali se multiplicam também os que a comem; e que proveito pois tem seus donos, a não ser somente ver a riqueza com seus olhos?",
+          "acertou": "Eccl 5:10"
+        },
+        {
+          "pergunta": "ansiedade",
+          "familia": "tema",
+          "posicao": 2,
+          "sinal": "verde",
+          "topo": "Prov 12:25-27",
+          "topoTexto": "A ansiedade no coração do homem o abate; mas uma boa palavra o alegra. O justo age cuidadosamente para com seu próximo, mas o caminho dos perversos os faz errar. O preguiçoso não assa aquilo que caçou, mas a riqueza de quem trabalha com empenho lhe é preciosa.",
+          "acertou": "1Pet 5:7"
+        },
+        {
+          "pergunta": "perdão",
+          "familia": "tema",
+          "posicao": 10,
+          "sinal": "amarelo",
+          "topo": "Prov 18:3-5",
+          "topoTexto": "Na vinda do perverso, vem também o desprezo; e com a desonra vem a vergonha. A boca do homem são como águas profundas; e o manancial de sabedoria como um ribeiro transbordante. Não é bom favorecer ao perverso para prejudicar ao justo num julgamento.",
+          "acertou": "Matt 6:14"
+        },
+        {
+          "pergunta": "amor ao próximo",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Rom 13:9-11",
+          "topoTexto": "Porque estes mandamentos: não adulterarás, não matarás, não roubarás, não cobiçarás; e qualquer outro mandamento que há, nesta frase se resumem: “Amarás ao teu próximo como a ti mesmo”. O amor não faz mal ao próximo. Assim, o cumprimento da Lei é o amor. Além disso, conheceis o tempo, que já é hora de despertardes do sono, porque a salvação está agora mais perto de nós do que quando começamos a crer.",
+          "acertou": "Rom 13:9"
+        },
+        {
+          "pergunta": "medo",
+          "familia": "tema",
+          "posicao": 48,
+          "sinal": "vermelho",
+          "topo": "Ezek 42:15-17",
+          "topoTexto": "E quando acabou de medir o templo interno, ele me tirou pelo caminho da porta que estava voltada para o oriente, e o mediu em redor. Mediu o lado oriental com a cana de medir, quinhentas canas da cana de medir em redor. Mediu ao lado do norte, quinhentas canas da cana de medir em redor.",
+          "acertou": "Ps 56:3"
+        },
+        {
+          "pergunta": "salvação",
+          "familia": "tema",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Ps 116:13-15",
+          "topoTexto": "Tomarei o copo da salvação, e chamarei o nome do SENHOR. Certamente pagarei meus votos ao SENHOR, na presença de todo o seu povo. Preciosa é aos olhos do SENHOR a morte de seus santos.",
+          "acertou": null
+        },
+        {
+          "pergunta": "humildade",
+          "familia": "tema",
+          "posicao": 2,
+          "sinal": "verde",
+          "topo": "Ps 123:3-4",
+          "topoTexto": "Tem piedade de nós, SENHOR! Tem piedade de nós; pois temos sido humilhados em excesso. Nossa alma está cheia da zombaria dos insolentes, e da humilhação dos arrogantes.",
+          "acertou": "1Pet 5:5"
+        },
+        {
+          "pergunta": "tentação",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Jas 1:13-15",
+          "topoTexto": "Ninguém, quando for tentado, diga: “Sou tentado por Deus”; porque Deus não é tentado pelo mal, e ele mesmo tenta ninguém; Mas cada um é tentado quando é atraído e seduzido pelo seu próprio mau desejo. Depois do mau desejo ter concebido, dá à luz o pecado; e o pecado, quando é completado, gera a morte.",
+          "acertou": "Jas 1:13"
+        },
+        {
+          "pergunta": "paz",
+          "familia": "tema",
+          "posicao": 18,
+          "sinal": "vermelho",
+          "topo": "Ps 122:7-9",
+          "topoTexto": "Paz haja em teus muros, e prosperidade em tuas fortalezas. Por meus irmãos e amigos, assim falarei: Paz haja em ti. Pela Casa do SENHOR nosso Deus, buscarei o bem para ti.",
+          "acertou": "John 14:27"
+        },
+        {
+          "pergunta": "sofrimento",
+          "familia": "tema",
+          "posicao": 18,
+          "sinal": "vermelho",
+          "topo": "2Cor 1:5-7",
+          "topoTexto": "Porque assim como os sofrimentos de Cristo são abundantes em nós, assim também por Cristo é abundante nossa consolação. Porém se nós somos afligidos, é para vossa consolação e salvação; se estamos consolados, também é para vossa consolação, que opera enquanto se suporta os mesmos sofrimentos que nós também sofremos. E nossa esperança por vós é firme, sabendo que, como sois participantes dos sofrimentos, assim também sois da consolação.",
+          "acertou": "Rom 8:18"
+        },
+        {
+          "pergunta": "Como lidar com preocupação sobre o futuro?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "1Tim 6:19-21",
+          "topoTexto": "que acumulem para si mesmos um bom fundamento para o futuro, para que obtenham a verdadeira vida. Timóteo, guarda o depósito que te foi confiado, evitando conversas vãs e profanas, e controvérsias do que é falsamente chamado de “conhecimento”; que alguns declararam seguir, e se desviaram da fé. A graça seja convosco.",
+          "acertou": null
+        },
+        {
+          "pergunta": "O que a Bíblia ensina sobre acumular bens?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Acts 4:9-11",
+          "topoTexto": "Se hoje somos interrogados quanto a uma boa ação feita a um enfermo, pela qual este foi curado; Seja conhecido a todos vós, e a todos o povo de Israel, que pelo nome de Jesus Cristo, o nazareno, aquele que vós crucificastes, ao qual Deus ressuscitou dos mortos, por ele este homem está são diante de vós. Este é a pedra que foi desprezada por vós, edificadores; a qual foi feita por cabeça de esquina.",
+          "acertou": null
+        },
+        {
+          "pergunta": "Como agir quando alguém me machuca?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Ps 69:25-27",
+          "topoTexto": "A habitação deles seja desolada; e que não haja morador nas tendas deles; Porque perseguem aquele a quem tu feriste, e contam histórias da dor daqueles a quem tu machucaste. Conta como maldade a maldade deles; e não sejam eles agraciados por tua justiça.",
+          "acertou": null
+        },
+        {
+          "pergunta": "Onde encontro conforto durante uma dificuldade?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Ps 73:11-13",
+          "topoTexto": "E dizem: Como Deus saberia? Será que o Altíssimo tem conhecimento disto? Eis que estes são perversos, sempre estão confortáveis e aumentam seus bens. Cheguei a pensar: Certamente purifiquei meu coração e lavei minhas mãos na inocência inutilmente,",
+          "acertou": null
+        },
+        {
+          "pergunta": "O que fazer quando estou com medo?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Rom 7:19-21",
+          "topoTexto": "Pois o bem que quero, não faço; mas o mal que não quero, isso faço. Ora, se faço o que não quero, não sou eu que faço, mas sim, o pecado que habita em mim. Acho, então, esta Lei: que quando quero fazer o bem, o mal está comigo.",
+          "acertou": null
+        },
+        {
+          "pergunta": "Como tratar uma pessoa que me fez mal?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Gal 3:9-11",
+          "topoTexto": "Portanto, os que são da fé são abençoados com o crente Abraão. Pois todos os que são das obras da Lei estão sob maldição, porque está escrito: Maldito todo aquele que não permanecer em todas as coisas que estão escritas no livro da Lei, para fazê-las. E é evidente que pela Lei ninguém será justificado, porque: O justo viverá pela fé.",
+          "acertou": null
+        }
+      ]
+    },
+    "float16": {
+      "versao": "v2-sem-vies",
+      "hit10": 0.375,
+      "mrr10": 0.25625,
+      "nota": 0.17124999999999999,
+      "porFamilia": {
+        "tema": {
+          "hit10": 0.6,
+          "mrr10": 0.41,
+          "n": 10
+        },
+        "parafrase": {
+          "hit10": 0,
+          "mrr10": 0,
+          "n": 6
+        }
+      },
+      "verdes": 5,
+      "amarelos": 1,
+      "vermelhos": 10,
+      "detalhe": [
+        {
+          "pergunta": "dinheiro e riqueza",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Eccl 5:9-11",
+          "topoTexto": "Mas o proveito da terra é para todos; até o rei se serve do campo. Aquele que amar o dinheiro, nunca se fartará de dinheiro; e quem amar a riqueza, nunca se fartará com seus bens; isto também é futilidade. Onde os bens se multiplicam, ali se multiplicam também os que a comem; e que proveito pois tem seus donos, a não ser somente ver a riqueza com seus olhos?",
+          "acertou": "Eccl 5:10"
+        },
+        {
+          "pergunta": "ansiedade",
+          "familia": "tema",
+          "posicao": 2,
+          "sinal": "verde",
+          "topo": "Prov 12:25-27",
+          "topoTexto": "A ansiedade no coração do homem o abate; mas uma boa palavra o alegra. O justo age cuidadosamente para com seu próximo, mas o caminho dos perversos os faz errar. O preguiçoso não assa aquilo que caçou, mas a riqueza de quem trabalha com empenho lhe é preciosa.",
+          "acertou": "1Pet 5:7"
+        },
+        {
+          "pergunta": "perdão",
+          "familia": "tema",
+          "posicao": 10,
+          "sinal": "amarelo",
+          "topo": "Prov 18:3-5",
+          "topoTexto": "Na vinda do perverso, vem também o desprezo; e com a desonra vem a vergonha. A boca do homem são como águas profundas; e o manancial de sabedoria como um ribeiro transbordante. Não é bom favorecer ao perverso para prejudicar ao justo num julgamento.",
+          "acertou": "Matt 6:14"
+        },
+        {
+          "pergunta": "amor ao próximo",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Rom 13:9-11",
+          "topoTexto": "Porque estes mandamentos: não adulterarás, não matarás, não roubarás, não cobiçarás; e qualquer outro mandamento que há, nesta frase se resumem: “Amarás ao teu próximo como a ti mesmo”. O amor não faz mal ao próximo. Assim, o cumprimento da Lei é o amor. Além disso, conheceis o tempo, que já é hora de despertardes do sono, porque a salvação está agora mais perto de nós do que quando começamos a crer.",
+          "acertou": "Rom 13:9"
+        },
+        {
+          "pergunta": "medo",
+          "familia": "tema",
+          "posicao": 47,
+          "sinal": "vermelho",
+          "topo": "Ezek 42:15-17",
+          "topoTexto": "E quando acabou de medir o templo interno, ele me tirou pelo caminho da porta que estava voltada para o oriente, e o mediu em redor. Mediu o lado oriental com a cana de medir, quinhentas canas da cana de medir em redor. Mediu ao lado do norte, quinhentas canas da cana de medir em redor.",
+          "acertou": "Ps 56:3"
+        },
+        {
+          "pergunta": "salvação",
+          "familia": "tema",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Ps 116:13-15",
+          "topoTexto": "Tomarei o copo da salvação, e chamarei o nome do SENHOR. Certamente pagarei meus votos ao SENHOR, na presença de todo o seu povo. Preciosa é aos olhos do SENHOR a morte de seus santos.",
+          "acertou": null
+        },
+        {
+          "pergunta": "humildade",
+          "familia": "tema",
+          "posicao": 2,
+          "sinal": "verde",
+          "topo": "Ps 123:3-4",
+          "topoTexto": "Tem piedade de nós, SENHOR! Tem piedade de nós; pois temos sido humilhados em excesso. Nossa alma está cheia da zombaria dos insolentes, e da humilhação dos arrogantes.",
+          "acertou": "1Pet 5:5"
+        },
+        {
+          "pergunta": "tentação",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Jas 1:13-15",
+          "topoTexto": "Ninguém, quando for tentado, diga: “Sou tentado por Deus”; porque Deus não é tentado pelo mal, e ele mesmo tenta ninguém; Mas cada um é tentado quando é atraído e seduzido pelo seu próprio mau desejo. Depois do mau desejo ter concebido, dá à luz o pecado; e o pecado, quando é completado, gera a morte.",
+          "acertou": "Jas 1:13"
+        },
+        {
+          "pergunta": "paz",
+          "familia": "tema",
+          "posicao": 18,
+          "sinal": "vermelho",
+          "topo": "Ps 122:7-9",
+          "topoTexto": "Paz haja em teus muros, e prosperidade em tuas fortalezas. Por meus irmãos e amigos, assim falarei: Paz haja em ti. Pela Casa do SENHOR nosso Deus, buscarei o bem para ti.",
+          "acertou": "John 14:27"
+        },
+        {
+          "pergunta": "sofrimento",
+          "familia": "tema",
+          "posicao": 18,
+          "sinal": "vermelho",
+          "topo": "2Cor 1:5-7",
+          "topoTexto": "Porque assim como os sofrimentos de Cristo são abundantes em nós, assim também por Cristo é abundante nossa consolação. Porém se nós somos afligidos, é para vossa consolação e salvação; se estamos consolados, também é para vossa consolação, que opera enquanto se suporta os mesmos sofrimentos que nós também sofremos. E nossa esperança por vós é firme, sabendo que, como sois participantes dos sofrimentos, assim também sois da consolação.",
+          "acertou": "Rom 8:18"
+        },
+        {
+          "pergunta": "Como lidar com preocupação sobre o futuro?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "1Tim 6:19-21",
+          "topoTexto": "que acumulem para si mesmos um bom fundamento para o futuro, para que obtenham a verdadeira vida. Timóteo, guarda o depósito que te foi confiado, evitando conversas vãs e profanas, e controvérsias do que é falsamente chamado de “conhecimento”; que alguns declararam seguir, e se desviaram da fé. A graça seja convosco.",
+          "acertou": null
+        },
+        {
+          "pergunta": "O que a Bíblia ensina sobre acumular bens?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Acts 4:9-11",
+          "topoTexto": "Se hoje somos interrogados quanto a uma boa ação feita a um enfermo, pela qual este foi curado; Seja conhecido a todos vós, e a todos o povo de Israel, que pelo nome de Jesus Cristo, o nazareno, aquele que vós crucificastes, ao qual Deus ressuscitou dos mortos, por ele este homem está são diante de vós. Este é a pedra que foi desprezada por vós, edificadores; a qual foi feita por cabeça de esquina.",
+          "acertou": null
+        },
+        {
+          "pergunta": "Como agir quando alguém me machuca?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Ps 69:25-27",
+          "topoTexto": "A habitação deles seja desolada; e que não haja morador nas tendas deles; Porque perseguem aquele a quem tu feriste, e contam histórias da dor daqueles a quem tu machucaste. Conta como maldade a maldade deles; e não sejam eles agraciados por tua justiça.",
+          "acertou": null
+        },
+        {
+          "pergunta": "Onde encontro conforto durante uma dificuldade?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Ps 73:11-13",
+          "topoTexto": "E dizem: Como Deus saberia? Será que o Altíssimo tem conhecimento disto? Eis que estes são perversos, sempre estão confortáveis e aumentam seus bens. Cheguei a pensar: Certamente purifiquei meu coração e lavei minhas mãos na inocência inutilmente,",
+          "acertou": null
+        },
+        {
+          "pergunta": "O que fazer quando estou com medo?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Rom 7:19-21",
+          "topoTexto": "Pois o bem que quero, não faço; mas o mal que não quero, isso faço. Ora, se faço o que não quero, não sou eu que faço, mas sim, o pecado que habita em mim. Acho, então, esta Lei: que quando quero fazer o bem, o mal está comigo.",
+          "acertou": null
+        },
+        {
+          "pergunta": "Como tratar uma pessoa que me fez mal?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Gal 3:9-11",
+          "topoTexto": "Portanto, os que são da fé são abençoados com o crente Abraão. Pois todos os que são das obras da Lei estão sob maldição, porque está escrito: Maldito todo aquele que não permanecer em todas as coisas que estão escritas no livro da Lei, para fazê-las. E é evidente que pela Lei ninguém será justificado, porque: O justo viverá pela fé.",
+          "acertou": null
         }
       ]
     }

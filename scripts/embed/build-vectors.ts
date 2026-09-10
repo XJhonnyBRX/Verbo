@@ -155,24 +155,41 @@ async function main(): Promise<void> {
   writeFileSync(path.join(dir, "queries.f32"), Buffer.from(queries.buffer));
   console.log(`${CONSULTAS.length} consultas embedadas`);
 
-  // meta.json por último: sua existência é o sinal de «completo».
-  writeFileSync(
-    arqMeta,
-    JSON.stringify(
-      {
-        modelo: provider.model,
-        dims,
-        chunks: chunks.length,
-        consultas: CONSULTAS.length,
-        segundos: Math.round(segundos),
-        porSegundo: Math.round((chunks.length - partida) / segundos),
-        geradoEm: new Date().toISOString(),
-      },
-      null,
-      2,
-    ),
-    "utf8",
-  );
+  /* meta.json por último: sua existência é o sinal de «completo».
+   *
+   * OS TEMPOS SÃO TRÊS E FICAM SEPARADOS DE PROPÓSITO. Uma execução que
+   * retoma um corpus já completo gasta zero segundos gerando, e registrar
+   * isso como «tempo de geração» faria o modelo parecer infinitamente rápido
+   * numa tabela comparativa. Já aconteceu aqui com o gte-small.
+   *
+   *   vetoresGerados    quantos ESTA execução embedou
+   *   vetoresRetomados  quantos vieram de execução anterior
+   *   geracaoSegundos   tempo gasto embedando, null se não gerou nada
+   *   porSegundo        ritmo, null quando não há geração para medir
+   */
+  const gerados = chunks.length - partida;
+  const meta = {
+    modelo: provider.model,
+    dims,
+    chunks: chunks.length,
+    consultas: CONSULTAS.length,
+    vetoresGerados: gerados,
+    vetoresRetomados: partida,
+    geracaoSegundos: gerados > 0 ? Math.round(segundos) : null,
+    porSegundo: gerados > 0 ? Math.round(gerados / segundos) : null,
+    execucaoCompleta: gerados === chunks.length - 1 || partida <= 1,
+    geradoEm: new Date().toISOString(),
+  };
+
+  if (gerados === 0) {
+    console.log(
+      "\nATENÇÃO: nada foi gerado nesta execução — o corpus já estava completo.\n" +
+        "  O tempo de geração fica como null, e não zero, para não contaminar\n" +
+        "  comparações de desempenho.",
+    );
+  }
+
+  writeFileSync(arqMeta, JSON.stringify(meta, null, 2), "utf8");
 
   console.log(`\ncompleto em ${dir}`);
 }
