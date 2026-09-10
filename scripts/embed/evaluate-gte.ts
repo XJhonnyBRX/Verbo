@@ -30,6 +30,15 @@ import { buildChunks, type Chunk } from "../../lib/bible/chunker";
  * pergunta — um texto por vez, que cabe folgado no orçamento. */
 const LOTE = 64;
 
+/* Modelo configurável para permitir o CONTROLE do experimento: se o gte-small
+   vai mal e um multilíngue vai bem no mesmo arnês, o problema é o modelo. Se
+   os dois forem mal, o problema é o arnês, e a conclusão seria outra.
+
+   Os modelos e5 exigem prefixo — "query:" na pergunta e "passage:" no texto —
+   e sem ele a qualidade despenca. Não é detalhe opcional. */
+const MODELO = process.env.MODELO ?? "Supabase/gte-small";
+const PREFIXO_E5 = MODELO.includes("e5");
+
 /** Perguntas temáticas com os versículos que uma boa resposta traria. */
 const AVALIACAO: Array<{ pergunta: string; esperados: string[] }> = [
   { pergunta: "O que a Bíblia fala sobre ansiedade?", esperados: ["Phil 4:6", "1Pet 5:7", "Matt 6:25"] },
@@ -58,13 +67,19 @@ function cosseno(a: number[], b: number[]): number {
    resolve — e documenta qual das 24 estamos usando. */
 let extrair: FeatureExtractionPipeline | undefined;
 
-async function embed(texts: string[]): Promise<number[][]> {
+async function embed(
+  texts: string[],
+  modo: "query" | "passage" = "passage",
+): Promise<number[][]> {
   extrair ??= (await pipeline(
     "feature-extraction",
-    "Supabase/gte-small",
+    MODELO,
   )) as FeatureExtractionPipeline;
 
-  const saida = await extrair(texts, { pooling: "mean", normalize: true });
+  const entrada = PREFIXO_E5
+    ? texts.map((t) => `${modo}: ${t}`)
+    : texts;
+  const saida = await extrair(entrada, { pooling: "mean", normalize: true });
   const dados = Array.from(saida.data as Float32Array);
   const dims = dados.length / texts.length;
   return texts.map((_, i) => dados.slice(i * dims, (i + 1) * dims));
@@ -94,6 +109,7 @@ async function main(): Promise<void> {
       text: v.t,
     })),
   );
+  console.log(`modelo: ${MODELO}`);
   console.log(`chunks gerados: ${chunks.length.toLocaleString("pt-BR")}`);
 
   if (amostra > 0 && amostra < chunks.length) {
@@ -149,7 +165,7 @@ async function main(): Promise<void> {
   let acertos = 0;
 
   for (const { pergunta, esperados } of AVALIACAO) {
-    const [qv] = await embed([pergunta]);
+    const [qv] = await embed([pergunta], "query");
 
     const ranking = vetores
       .map((v, i) => ({ i, s: cosseno(qv, v) }))
