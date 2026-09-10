@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Attribution } from "@/components/attribution";
-import { OpeningVerse } from "@/components/opening-verse";
+import { HomeOpening } from "@/components/continue-reading";
 import { NEW_TESTAMENT, OLD_TESTAMENT, type Book } from "@/lib/bible/canon";
 
 /* Esta página continua sendo Server Component de propósito: o índice dos 66
@@ -20,7 +20,7 @@ export default function Home() {
         <p className="text-[0.75rem] text-label">Bíblia. Fé. Conhecimento.</p>
       </header>
 
-      <OpeningVerse />
+      <HomeOpening />
 
       <Testament title="Antigo Testamento" books={OLD_TESTAMENT} />
       <Testament title="Novo Testamento" books={NEW_TESTAMENT} />

@@ -707,3 +707,116 @@ Ciclos 2, 3 e 4 são independentes entre si e podem ser reordenados.
 - Nenhuma referência exibida pelo VERBO aponta para um versículo inexistente.
 - Instala como PWA no Android.
 - Existe um número mensurável de citações descartadas por resposta.
+
+---
+
+# Decisões fechadas em 2026-09-10
+
+## Posição de leitura ≠ histórico de leitura
+
+Duas camadas, e confundi-las acoplaria retenção a autenticação sem necessidade.
+
+| | O quê | Quando |
+|---|---|---|
+| **Reading Position** | onde a pessoa parou, no dispositivo | agora, sem conta, offline |
+| `reading_history` | sincronização entre dispositivos | Ciclo 3+, exige `authenticated` |
+
+A tabela `reading_history` referencia `auth.users` e tem as três políticas de
+RLS `to authenticated`: sem o Ciclo 3 ela não recebe uma linha. A posição
+local não é um substituto provisório dela — é a fonte imediata, que continua
+existindo depois que a sincronização chegar.
+
+**Guardamos OSIS, não `book_id`.** O identificador do banco é um `bigint` que
+só existe no Postgres e que muda se uma tradução for reimportada. O OSIS é o
+que as rotas usam e o que é estável. A tradução `osis → book_id` pertence ao
+servidor, no dia da sincronização.
+
+**Registro mínimo**, de propósito: tradução, OSIS, capítulo, instante. Sem
+rolagem, sem último versículo, sem porcentagem, sem eventos. A feature é
+«volte onde parou», não um sistema de rastreamento — e cada campo a mais
+seria um convite a virar isso. Verificado por asserção automática.
+
+**Só conta como leitura depois de o capítulo passar 5 segundos na tela**, e
+só se ele realmente carregou. Sem isso, folhear o índice apagaria o lugar
+onde a pessoa estava.
+
+**A abertura da home é substituída, não empilhada.** A home abre com
+Escritura; para quem está voltando, a Escritura dela é o capítulo onde parou.
+Duas regiões de destaque competiriam, e a que tem um botão venceria.
+
+## Ordem de execução: por dependência, não por importância
+
+```
+                    ┌─→ Reading Position   (independente — pode avançar)
+                    │
+Retrieval ──→ Ask ──┼─→ Áudio              (bloqueado)
+                    │
+                    └─→ Expansão           (bloqueado)
+```
+
+Retrieval é a variável central: diferenciação depende dele, o limiar depende
+dos dados dele, o Ask depende dele. Reading Position não depende de nada
+disso, e é o único item que testa retenção — a única linha da avaliação com
+«?» em vez de nota.
+
+## O limiar do portão de evidência precisa de conjunto reservado
+
+`Evidência suficiente` é um limiar, e ninguém o definiu. É o dial entre
+*recusa demais* e *responde sem base*, e no dia em que o VERBO parecer burro
+numa demonstração a tentação será baixá-lo.
+
+**Calibrar o portão nas 16 consultas de `queries.ts` seria repetir o problema
+v1 → v2 uma camada acima:** ajustar a régua nas perguntas em que o sistema já
+foi otimizado para ir bem. O limiar sai otimista, e em produção a taxa de
+recusa é maior do que a calibração previu.
+
+```
+seleção do retriever   →  queries.ts + verdade-base v2   (congelados)
+calibração do limiar   →  CONJUNTO RESERVADO             (a escrever)
+avaliação final        →  conjunto de avaliação
+```
+
+O conjunto reservado tem de ser escrito **antes** de existir um número de
+Gemini na mesa, e nunca pode ser usado em seleção de modelo.
+
+## O contrato da recusa
+
+Dois artefatos com mecanismos diferentes, não um mesmo artefato com tom
+diferente.
+
+| | ANSWER | REFUSAL |
+|---|---|---|
+| origem | busca vetorial + IA | `search_verses`, Postgres puro |
+| IA interpreta | sim | **não** |
+| o que aparece | resposta + âncoras verificadas | resultado de busca textual |
+
+> **Se o portão recusar, a saída da IA não pode conter interpretação das
+> passagens.** A seção inferior é exclusivamente resultado de busca — e vem
+> de outro mecanismo, não do top-k que acabou de reprovar no portão.
+
+Mostrar o mesmo top-k reprovado sob um rótulo mais macio é o portão vazando:
+o usuário lê aquilo como a resposta, porque é o único conteúdo bíblico na
+tela depois de uma pergunta. Como o ramo de recusa nunca lê a saída vetorial,
+a regra é verificável no código.
+
+## COST_GUARD_V1
+
+Custo **não bloqueia o MVP**; bloqueia crescimento. A variável não é preço por
+token — é requisição de embedding **de consulta** por minuto, somando todos os
+usuários. A ingestão é custo de implantação, uma vez por tradução.
+
+**Papéis separados, mesmo que ambos sejam Gemini hoje:**
+
+```
+PRODUCTION_QUERY_KEY  → somente embedQuery()
+INGESTION_KEY         → somente embedDocuments()
+```
+
+Medido em 2026-09-10: ingestão e consulta dividem a mesma cota, e um lote não
+é desconto — a cota conta textos, não requisições. Uma reindexação rodando
+contra a chave de produção derruba as perguntas dos usuários com 429. Não é
+hipótese; aconteceu aqui em escala pequena.
+
+Ao ultrapassar o limite operacional sustentado, avaliar nesta ordem: tier
+pago, embedding local, cache, arquitetura híbrida. **Não alterar o retrieval
+apenas para reduzir custo sem novo benchmark.**

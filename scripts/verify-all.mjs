@@ -98,6 +98,15 @@ if (construiu) {
     await etapa("acessibilidade WCAG 2.2", "node", ["scripts/audit-a11y.mjs", base], {
       silencioso: true,
     });
+    /* Leva ~15s por causa da espera deliberada do temporizador. Vale: é o
+       único laço do produto que ninguém consegue verificar lendo o código,
+       porque depende de tempo e de duas telas conversando. */
+    await etapa(
+      "posição de leitura",
+      "node",
+      ["scripts/verify-reading-position.mjs", base],
+      { silencioso: true },
+    );
   }
 
   servidor.kill();

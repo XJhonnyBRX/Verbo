@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 import { bookByOsis } from "@/lib/bible/canon";
-import { getChapter, type Verse } from "@/lib/data/bible";
+import { getChapter, TRANSLATION_SLUG, type Verse } from "@/lib/data/bible";
+import { ESPERA_PARA_REGISTRAR_MS, setPosition } from "@/lib/reading-position";
 
 /* Componente de CLIENTE, e isso não é detalhe.
  *
@@ -63,6 +64,33 @@ export function ChapterReader({
   if (!valido || !book) notFound();
 
   const atual = resultado?.chave === chave ? resultado : null;
+  const leu = Boolean(atual?.versos?.length);
+
+  /* POSIÇÃO DE LEITURA.
+   *
+   * Grava só depois de o capítulo passar alguns segundos na tela. Sem isso,
+   * folhear o índice apagaria o lugar onde a pessoa estava — cada capítulo
+   * aberto por engano viraria a nova posição.
+   *
+   * A dependência é `leu`, e não só a chave: um capítulo que falhou ao
+   * carregar, ou que não existe nesta tradução, não é leitura. Registrá-lo
+   * mandaria a pessoa de volta para uma tela vazia amanhã.
+   *
+   * O `clearTimeout` na limpeza reinicia a contagem a cada troca de
+   * capítulo, que é o comportamento que faz a espera significar algo. */
+  useEffect(() => {
+    if (!leu || !book) return;
+    const t = setTimeout(() => {
+      void setPosition({
+        translation: TRANSLATION_SLUG,
+        osis: book.osis,
+        chapter,
+      });
+    }, ESPERA_PARA_REGISTRAR_MS);
+    return () => {
+      clearTimeout(t);
+    };
+  }, [leu, book, chapter]);
 
   return (
     <article className="mx-auto max-w-3xl px-5 pt-6 pb-4">
