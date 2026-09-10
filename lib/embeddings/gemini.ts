@@ -48,6 +48,8 @@ interface Chave {
   valor: string;
   /** Timestamp até quando esta chave está de castigo por 429. */
   bloqueadaAte: number;
+  /** Bateu o teto DIARIO: nao adianta esperar, so amanha. */
+  diaria: boolean;
   usos: number;
   falhas: number;
 }
@@ -73,6 +75,7 @@ export class GeminiEmbeddings implements EmbeddingProvider {
     this.chaves = lista.map((valor) => ({
       valor,
       bloqueadaAte: 0,
+      diaria: false,
       usos: 0,
       falhas: 0,
     }));
@@ -177,10 +180,36 @@ export class GeminiEmbeddings implements EmbeddingProvider {
       }
 
       const corpo = await r.text();
-      ultimoErro = `${r.status} ${corpo.slice(0, 260)}`;
+      ultimoErro = `${r.status} ${corpo.slice(0, 600)}`;
 
       if (r.status === 429) {
         chave.falhas++;
+
+        /* QUAL COTA ESTOUROU — medido, porque a intuição erra aqui.
+         *
+         * A espera pedida NÃO distingue: a cota diária também responde
+         * «retry in 47s», e esperar 47 segundos não devolve nada, porque o
+         * dia não acabou. Foi assim que uma geração ficou seis minutos
+         * girando em oito tentativas para depois falhar com uma mensagem
+         * que não dizia «volte amanhã».
+         *
+         * O que distingue é o `limit` no corpo do erro:
+         *   limit: 100   requisições por minuto  → esperar resolve
+         *   limit: 1000  requisições por dia     → só amanhã resolve
+         */
+        const teto = /limit:\s*(\d+)/.exec(corpo);
+        if (teto && Number(teto[1]) >= 1000) {
+          chave.diaria = true;
+          chave.bloqueadaAte = Number.MAX_SAFE_INTEGER;
+          if (this.chaves.every((c) => c.diaria)) {
+            throw new Error(
+              `${COTA_DIARIA}: as ${this.chaves.length} chave(s) bateram o teto ` +
+                `de ${teto[1]} requisições por dia`,
+            );
+          }
+          continue;
+        }
+
         const pedida = GeminiEmbeddings.esperaPedida(corpo);
         /* Cota diária esgotada não se resolve em 40 segundos. Quando a API
            não diz quanto esperar num 429, tratamos como diária e tiramos a

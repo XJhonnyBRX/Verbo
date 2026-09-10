@@ -311,3 +311,81 @@ Rodar o parcial **não pode tocar em `scripts/embed/queries.ts` nem na
 verdade-base v2.** Se o subconjunto revelar uma armadilha nova e ela for
 acrescentada à régua, a auditoria de viés se reabre e os 51% contra 17% já
 registrados deixam de ser comparáveis. A régua está congelada.
+
+---
+
+## Execução do benchmark parcial — 2026-09-10
+
+### O corpus
+
+`scripts/embed/build-subset.ts`, semente 20260910, quatro camadas em ordem
+deliberada. Pedidos 1.800; a cota diária do Gemini parou em **1.025**.
+
+| Camada | Pedida | Gerada |
+|---|---|---|
+| ouro (referências da v2) | 191 | **191** |
+| distratores nomeados | 11 | **11** |
+| distratores léxicos por `ts_rank` | 819 | **819** |
+| preenchimento aleatório | 779 | 4 |
+
+**O núcleo adversarial está completo.** Só faltou ruído de fundo, que é
+exatamente o que a ordem das camadas foi desenhada para sacrificar. As 16
+consultas têm resposta possível dentro do corpus — verificado na montagem.
+
+### O jogo em casa, agora medido
+
+O commit anterior argumentou que um subconjunto infla todo mundo. Quanto:
+
+| Modelo | 15.246 chunks | 1.025 chunks | Δ |
+|---|---|---|---|
+| multilingual-e5-small | 54% | **81%** | **+27 pp** |
+| gte-small | 18% | **27%** | +9 pp |
+
+Vinte e sete pontos. Maior do que eu suporia — e a prova de que **nenhuma
+nota tirada aqui pode ser comparada com as notas do corpus completo.** A
+régua deste experimento é o e5 a 81%, não o e5 a 54%.
+
+### O que NÃO inflou: as armadilhas
+
+Todas as cinco falhas documentadas do e5 sobreviveram ao recorte, e ele
+continua caindo em todas, em 1º lugar:
+
+| Consulta | 1º lugar no subconjunto |
+|---|---|
+| salvação | Ps 3:7-8 — *«Levanta-te SENHOR, **salva**-me»* |
+| humildade | Ps 89:51-52 — *«Com **humilha**ção os teus inimigos»* |
+| «tratar uma pessoa que me fez mal» | Ps 109:21-23 — *«me **trata** bem»* |
+| «Como agir quando alguém me machuca?» | Jó 41:1-3 — pescar o leviatã |
+| «Onde encontro conforto numa dificuldade?» | 2Tm 4:21-22 — lista de saudações |
+
+E a camada léxica cumpriu o que prometia: produziu **uma armadilha nova**,
+que nenhum modelo tinha enfrentado. «sofrimento» virou 🔴 para o e5, com
+Sl 38:9-11 — *«todo o meu **sofrimento** está diante de ti»* — em primeiro.
+Saiu de uma regra, não da nossa memória.
+
+### Consequência: como ler o Gemini, fixado antes de medi-lo
+
+A nota do subconjunto está contaminada pelo tamanho do corpus. O
+comportamento nas armadilhas não está — elas continuam lá, intactas. Então
+a leitura primária **não é a nota**:
+
+> Nas seis armadilhas (as cinco documentadas mais «sofrimento»), o Gemini
+> coloca uma passagem relevante em 1º lugar, ou repete o distrator?
+
+Seis casos binários. A nota entra só como contexto, e sempre contra os 81%
+do e5 no mesmo corpus — nunca contra os 54% do corpus inteiro.
+
+Isso não altera a regra do commit anterior, que continua valendo: falhar
+aqui rejeita o Gemini; passar aqui não aprova nada.
+
+### Estado
+
+Faltam **16 requisições** — os vetores das consultas — para o Gemini ser
+mensurável. A cota diária das duas chaves zerou em 1.025 chunks. Retomar:
+
+```
+MODELO=gemini-embedding-2 DIMS=768 npx tsx scripts/embed/close-partial.ts
+SAIDA=benchmark-parcial npx tsx scripts/embed/benchmark.ts subset
+```
+
+Os resultados do e5 e do gte neste corpus já estão em `benchmark-parcial/`.

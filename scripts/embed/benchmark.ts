@@ -35,7 +35,12 @@ import type { Chunk } from "../../lib/bible/chunker";
 import { CONSULTAS, parseRef, referencias, type Familia } from "./queries";
 
 const RAIZ = path.join("data", "vectors");
-const SAIDA = "benchmark";
+/* O benchmark parcial NAO pode escrever por cima do completo: benchmark/
+   guarda os 51% contra 17% medidos no corpus inteiro, e e contra eles que
+   qualquer resultado futuro se compara. Uma rodada num corpus de 1.025 que
+   sobrescrevesse aquilo destruiria a propria regua.
+     SAIDA=benchmark-parcial npx tsx scripts/embed/benchmark.ts subset */
+const SAIDA = process.env.SAIDA ?? "benchmark";
 const PROFUNDIDADE = 50; // até onde procuramos, para saber quão longe ficou
 const CORTE = 10; // Hit@ e MRR@ usam este corte
 
