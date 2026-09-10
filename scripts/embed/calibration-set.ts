@@ -49,6 +49,19 @@
  * O item 2 é o que transforma o portão de um botão de ajuste em critério de
  * publicação. Sem ele, «baixa esse limite» sempre vence.
  *
+ * ATENÇÃO À ARITMÉTICA DOS 2%, e isto está escrito antes de qualquer medição:
+ * a calibração tem SEIS perguntas cuja decisão esperada é recusar. A menor
+ * taxa não-nula possível é 1/6 = 16,7%. Não existe nada entre 0% e 16,7%.
+ *
+ *   Neste conjunto, «≤ 2%» significa ZERO respostas sem base. A regra parece
+ *   ter folga e não tem.
+ *
+ * Está correto assim — a intenção sempre foi tolerância zero a inventar
+ * Escritura. Mas o número precisa ser lido como binário, e não como margem,
+ * senão alguém vai achar que sobra espaço. Para que os 2% virem uma taxa de
+ * verdade seriam necessárias ~50 perguntas de recusa, o que é trabalho de uma
+ * reserva futura, não deste congelamento.
+ *
  * ─────────────────────────────────────────────────────────────────────────
  * AS NOVE FAMÍLIAS
  *

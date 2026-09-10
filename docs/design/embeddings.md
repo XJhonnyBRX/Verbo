@@ -446,6 +446,23 @@ acerto médio:
 O item 2 é o que transforma o portão de botão de ajuste em critério de
 publicação. Sem ele, «baixa esse limite» sempre vence.
 
+**A aritmética dos 2%, registrada antes de qualquer medição.** A calibração
+tem **seis** perguntas cuja decisão esperada é recusar. A menor taxa não-nula
+possível é 1/6 = **16,7%**. Não existe nada entre 0% e 16,7%.
+
+> Neste conjunto, «≤ 2%» significa **zero** respostas sem base.
+
+Está correto assim — a intenção sempre foi tolerância zero a inventar
+Escritura. Mas o número tem de ser lido como binário, não como margem, senão
+daqui a três meses alguém vai achar que sobra espaço. Para os 2% virarem uma
+taxa de verdade seriam necessárias ~50 perguntas de recusa: trabalho de uma
+reserva futura, não deste congelamento.
+
+**A reserva é consumível.** Quando o conjunto de avaliação for usado, ele
+também estará gasto. Qualquer mudança futura de limiar exige uma reserva nova,
+escrita antes de ver o resultado que a motivou — pela mesma razão que esta
+existe.
+
 ### O congelamento é asserção, não comentário
 
 A impressão digital está em `scripts/embed/calibration-set.sha256` e é
