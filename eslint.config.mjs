@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // O projeto Android é gerado e mantido pelo Capacitor; seus JS
+    // intermediários (native-bridge.js e companhia) não são código nosso.
+    "android/**",
   ]),
 ]);
 
