@@ -57,6 +57,15 @@ for (const scheme of ["light", "dark"]) {
       );
     }
 
+    // O leitor e a home buscam do banco depois de hidratar; sem esperar, a
+    // captura pega a tela de "carregando".
+    if (name === "leitor") {
+      await page.locator(".verse-num").first().waitFor({ state: "visible" });
+    }
+    if (name === "home") {
+      await page.locator(".anchor-ref").first().waitFor({ state: "visible" });
+    }
+
     // /perguntar precisa de interação para mostrar a âncora. O clique só vale
     // depois da hidratação — antes dela o React ainda não anexou os listeners
     // e o clique é silenciosamente engolido.

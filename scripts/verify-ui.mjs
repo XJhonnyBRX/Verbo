@@ -75,6 +75,11 @@ for (const scheme of ["light", "dark"]) {
   const page = await ctx.newPage();
   await page.goto(`${BASE}/biblia/John/3`, { waitUntil: "networkidle" });
 
+  // O leitor busca o capítulo no banco depois de hidratar, então os números
+  // de versículo não existem no primeiro paint. Sem esta espera a medição de
+  // contraste lê `null` e o script quebra de um jeito que parece bug de CSS.
+  await page.locator(".verse-num").first().waitFor({ state: "attached" });
+
   const colors = await page.evaluate(() => {
     const body = getComputedStyle(document.body);
     const num = document.querySelector(".verse-num");

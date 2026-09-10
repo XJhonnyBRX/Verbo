@@ -31,10 +31,25 @@ inventada é a métrica de credibilidade do projeto.
 
 ## Rodando
 
+Precisa de Docker Desktop aberto — o Supabase local roda em container.
+
 ```bash
 npm install
-npm run dev          # http://localhost:3000
+npx supabase start        # sobe Postgres, PostgREST, Auth e Studio
 ```
+
+Copie `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY` do que o
+comando imprime para um `.env.local`, junto com a `DATABASE_URL` direta.
+Depois importe a Bíblia — uma vez só:
+
+```bash
+npm run import:dry -- data/source/BLIVRE.json    # valida sem gravar
+npm run import:bible -- data/source/BLIVRE.json  # 31.102 versículos, ~2s
+npm run dev                                      # http://localhost:3000
+```
+
+O arquivo-fonte não é versionado (32 MB). A URL e o checksum estão em
+[docs/design/traducao.md](docs/design/traducao.md).
 
 ## Verificação
 
@@ -59,25 +74,27 @@ de overflow horizontal em largura de celular.
 
 | Área | Situação |
 |---|---|
-| Sistema de design, PWA, quatro telas | funcionando |
-| Canon (66 livros) e parser de referências | 60 testes passando |
-| Migrations do Postgres | aplicadas e verificadas em Postgres 17 + pgvector, 17 garantias |
-| Edge Function `ask` | não existe; a tela usa demonstração fixa |
+| Texto bíblico | **A Bíblia Livre, 31.102 versículos importados e validados** |
+| Migrations do Postgres | verificadas em Postgres 17 + pgvector e em Supabase, 17 garantias |
+| Canon, parser de referências, importação | 122 testes |
+| Sistema de design, PWA, quatro telas | funcionando, ligadas ao banco |
+| Edge Function `ask` | não existe; a tela usa resposta fixa, mas valida contra o banco real |
+| Chunks e embeddings | Ciclo 4 |
 | Auth, favoritos, anotações | Ciclo 3 |
-| Texto bíblico | **amostra descartável** — ver abaixo |
 
-### Duas pendências que bloqueiam lançamento
+### Desempenho medido com a Bíblia real
 
-**A tradução.** Nenhuma foi escolhida ainda. O texto exibido hoje é uma
-amostra de desenvolvimento em `lib/bible/sample.ts`, que não passou por
-conferência de fonte, licença ou digitalização. **Não use nada dela para
-estudo.** A primeira tarefa do Ciclo 1 é verificar licença e formato dos
-candidatos de domínio público.
+| Consulta | Tempo |
+|---|---|
+| Salmos 119 — 176 versículos, o maior capítulo | 2,8 ms |
+| Busca por «Deus» — casa com 4.028 versículos, o pior caso real | 19,1 ms |
 
-**O portão.** Enquanto `VERBO_ALLOW_SAMPLE` existir no `.env`, o VERBO pode
-ir ao ar exibindo esse texto não conferido. Apagar aquelas duas linhas é o
-portão de lançamento: sem elas, o build falha se alguém tentar publicar com
-a amostra.
+### A licença obriga a exibir o crédito
+
+A Bíblia Livre é CC BY 3.0 BR. **A atribuição é condição da licença, não
+cortesia:** se o crédito sair da interface, o uso do texto deixa de ser
+licenciado. O componente `components/attribution.tsx` busca o crédito do
+banco, da tradução realmente importada — não de uma constante no código.
 
 ## Stack
 

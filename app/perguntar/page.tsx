@@ -3,17 +3,17 @@
 import { useState } from "react";
 import { AnchorList, type Anchored } from "@/components/anchor";
 import { extractCitations, formatReference } from "@/lib/bible/reference";
-import { sampleResolve } from "@/lib/bible/sample";
+import { resolvePassage } from "@/lib/data/bible";
 
 /* A regra de ouro rodando na tela.
  *
  * A resposta chega como texto. Este componente NÃO confia nela: extrai toda
- * citação com o parser, resolve cada uma contra a fonte, e só renderiza as que
- * resolveram. O que não resolveu é contado e mostrado.
+ * citação com o parser, resolve cada uma contra o BANCO, e só renderiza as
+ * que resolveram. O que não resolveu é contado e mostrado.
  *
- * Na Edge Function `ask` isso acontece antes, no servidor, e com o banco no
- * lugar da amostra — mas a lógica é esta, e é de propósito que ela também
- * exista aqui: a interface não tem como exibir uma referência sem lastro. */
+ * Na Edge Function `ask` isso acontecerá antes, no servidor, com o mesmo
+ * banco — e é de propósito que a checagem também exista aqui: a interface
+ * não tem como exibir uma referência sem lastro. */
 
 const SUGGESTIONS = [
   "O que a Bíblia fala sobre ansiedade?",
@@ -22,7 +22,8 @@ const SUGGESTIONS = [
 ];
 
 /* Demonstração enquanto a Edge Function não existe. Cita de propósito um
-   "Salmos 151:2" que não existe, para que o descarte apareça funcionando. */
+   "Salmos 151:2" que não existe, para que o descarte apareça funcionando
+   contra a Escritura de verdade. */
 const DEMO_ANSWER =
   "A Bíblia trata a ansiedade como algo a ser entregue, não administrado. " +
   "Paulo instrui que as petições sejam apresentadas a Deus com ação de graças, " +
@@ -41,7 +42,7 @@ export default function PerguntarPage() {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [pending, setPending] = useState(false);
 
-  function ask(text: string) {
+  async function ask(text: string) {
     const q = text.trim();
     if (!q || pending) return;
 
@@ -49,27 +50,29 @@ export default function PerguntarPage() {
     setPending(true);
     setAnswer(null);
 
-    // Enquanto a Edge Function não está ligada, a resposta é fixa. A validação
-    // abaixo é a real e roda igual.
-    window.setTimeout(() => {
-      const { references, rejected } = extractCitations(DEMO_ANSWER);
+    const { references, rejected } = extractCitations(DEMO_ANSWER);
 
-      const anchors: Anchored[] = [];
-      // Duas origens de descarte, e as duas contam:
-      //   1. citação de lugar que não existe no canon — `rejected`;
-      //   2. referência que existe mas não estava no contexto entregue —
-      //      acertar por sorte também é falha.
-      const discarded: string[] = [...rejected];
+    // Duas origens de descarte, e as duas contam:
+    //   1. citação de lugar que não existe no canon — `rejected`;
+    //   2. referência que existe no canon mas não tem texto nesta tradução,
+    //      ou não estava no contexto entregue.
+    const discarded: string[] = [...rejected];
+    const anchors: Anchored[] = [];
 
-      for (const reference of references) {
-        const resolved = sampleResolve(reference);
-        if (resolved) anchors.push({ reference, text: resolved });
-        else discarded.push(formatReference(reference));
-      }
+    const resolvidas = await Promise.all(
+      references.map(async (reference) => ({
+        reference,
+        texto: await resolvePassage(reference).catch(() => null),
+      })),
+    );
 
-      setAnswer({ text: DEMO_ANSWER, anchors, discarded });
-      setPending(false);
-    }, 320);
+    for (const { reference, texto } of resolvidas) {
+      if (texto) anchors.push({ reference, text: texto });
+      else discarded.push(formatReference(reference));
+    }
+
+    setAnswer({ text: DEMO_ANSWER, anchors, discarded });
+    setPending(false);
   }
 
   return (
@@ -81,7 +84,7 @@ export default function PerguntarPage() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          ask(question);
+          void ask(question);
         }}
         className="mt-5"
       >
@@ -104,7 +107,7 @@ export default function PerguntarPage() {
             <li key={s}>
               <button
                 type="button"
-                onClick={() => ask(s)}
+                onClick={() => void ask(s)}
                 className="text-left font-scripture text-[1.0625rem] text-ink-soft underline decoration-hairline underline-offset-4"
               >
                 {s}
@@ -136,8 +139,8 @@ export default function PerguntarPage() {
           )}
 
           <p className="mt-4 text-[0.8125rem] leading-relaxed text-label">
-            Demonstração. A resposta ainda não vem de um modelo — a validação
-            das referências, essa sim, é a de verdade.
+            Demonstração. A resposta ainda não vem de um modelo — mas as
+            referências foram conferidas contra a Bíblia no banco.
           </p>
         </section>
       )}

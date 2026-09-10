@@ -1,21 +1,65 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { bookByOsis } from "@/lib/bible/canon";
-import { sampleChapter } from "@/lib/bible/sample";
+import { getChapter, type Verse } from "@/lib/data/bible";
 
-/* Next 16: params é Promise. */
-type Params = Promise<{ osis: string; chapter: string }>;
+/* Componente de CLIENTE, e isso não é detalhe.
+ *
+ * Se o capítulo fosse buscado no servidor, a leitura da Bíblia dependeria do
+ * servidor do Next — que não existe dentro de um app Android empacotado. A
+ * regra do spec, seção 3: nenhuma lógica essencial no servidor do Next.
+ *
+ * O custo é perder renderização no servidor destas páginas, e com ela o SEO
+ * de buscas como «João 3:16». A recuperação é aditiva e vem depois: uma rota
+ * pública server-rendered, fora do build do Capacitor. */
 
-export default async function ChapterPage({ params }: { params: Params }) {
-  const { osis, chapter: chapterParam } = await params;
+/* O resultado carrega a chave do capítulo que ele responde. Assim "carregando"
+   é DERIVADO — a chave do resultado ainda não bate com a da rota — em vez de
+   ser um setState síncrono dentro do efeito, que dispara render em cascata a
+   cada troca de capítulo. */
+interface Resultado {
+  chave: string;
+  versos?: Verse[];
+  erro?: string;
+}
+
+export default function ChapterPage() {
+  const params = useParams<{ osis: string; chapter: string }>();
+  const osis = params.osis;
+  const chapter = Number(params.chapter);
 
   const book = bookByOsis(osis);
-  const chapter = Number(chapterParam);
+  const valido =
+    book && Number.isInteger(chapter) && chapter >= 1 && chapter <= book.chapters;
+  const chave = `${osis}/${chapter}`;
 
-  if (!book || !Number.isInteger(chapter)) notFound();
-  if (chapter < 1 || chapter > book.chapters) notFound();
+  const [resultado, setResultado] = useState<Resultado | null>(null);
 
-  const content = sampleChapter(book.osis, chapter);
+  useEffect(() => {
+    if (!valido || !book) return;
+    let cancelado = false;
+
+    getChapter(book.osis, chapter)
+      .then((versos) => {
+        if (!cancelado) setResultado({ chave, versos });
+      })
+      .catch((erro: unknown) => {
+        if (!cancelado) {
+          setResultado({ chave, erro: (erro as Error).message });
+        }
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [book, chapter, chave, valido]);
+
+  if (!valido || !book) notFound();
+
+  const atual = resultado?.chave === chave ? resultado : null;
 
   return (
     <article className="mx-auto max-w-3xl px-5 pt-6 pb-4">
@@ -52,10 +96,31 @@ export default async function ChapterPage({ params }: { params: Params }) {
         </h1>
       </header>
 
-      {content ? (
+      {!atual && (
+        <p className="text-[0.875rem] text-label" role="status">
+          Abrindo o capítulo…
+        </p>
+      )}
+
+      {atual?.erro && (
+        <div className="max-w-prose">
+          <p className="scripture text-ink-soft">
+            Não foi possível abrir este capítulo agora.
+          </p>
+          <p className="mt-3 text-[0.8125rem] text-label">{atual.erro}</p>
+        </div>
+      )}
+
+      {atual?.versos?.length === 0 && (
+        <p className="scripture max-w-prose text-ink-soft">
+          Este capítulo não foi encontrado nesta tradução.
+        </p>
+      )}
+
+      {atual?.versos && atual.versos.length > 0 && (
         /* pl deixa espaço para o número pendurado na margem acima de 40rem. */
         <div className="scripture sm:pl-10">
-          {content.verses.map((v) => (
+          {atual.versos.map((v) => (
             <p key={v.verse} id={`v${v.verse}`} className="verse">
               <span className="verse-num" aria-hidden="true">
                 {v.verse}
@@ -67,36 +132,7 @@ export default async function ChapterPage({ params }: { params: Params }) {
             </p>
           ))}
         </div>
-      ) : (
-        <EmptyChapter />
       )}
     </article>
-  );
-}
-
-function EmptyChapter() {
-  return (
-    <div className="max-w-prose">
-      <p className="scripture text-ink-soft">
-        Este capítulo entra quando a tradução for importada.
-      </p>
-      <p className="mt-4 text-[0.875rem] text-label">
-        Na amostra de desenvolvimento existem quatro passagens.
-      </p>
-      <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[0.875rem]">
-        {[
-          { href: "/biblia/John/3", label: "João 3" },
-          { href: "/biblia/Ps/23", label: "Salmos 23" },
-          { href: "/biblia/Phil/4", label: "Filipenses 4" },
-          { href: "/biblia/1Pet/5", label: "1 Pedro 5" },
-        ].map((l) => (
-          <li key={l.href}>
-            <Link href={l.href} className="anchor-ref no-underline">
-              {l.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }

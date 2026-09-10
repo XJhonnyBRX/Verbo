@@ -1,43 +1,31 @@
 import Link from "next/link";
+import { Attribution } from "@/components/attribution";
+import { OpeningVerse } from "@/components/opening-verse";
 import { NEW_TESTAMENT, OLD_TESTAMENT, type Book } from "@/lib/bible/canon";
-import { sampleVerse } from "@/lib/bible/sample";
 
-/* A home abre com o texto, não com a marca. É o que acontece quando você
-   abre uma Bíblia: você vê Escritura. O índice vem depois. */
+/* Esta página continua sendo Server Component de propósito: o índice dos 66
+   livros é dado estático de lib/bible/canon.ts, não precisa de rede e não
+   deve esperar por ela. Num export estático ele é pré-renderizado, então
+   funciona igual dentro do app empacotado.
+   O que vem do banco — a abertura e o crédito — está isolado em componentes
+   de cliente. */
 
 export default function Home() {
-  const opening = sampleVerse("Ps", 23, 1);
-
   return (
     <div className="mx-auto max-w-3xl px-5 pt-8 pb-4">
-      <header className="flex items-baseline justify-between">
+      <header className="flex flex-wrap items-baseline justify-between gap-x-4">
         <h1 className="font-scripture text-[1.375rem] font-semibold tracking-[0.14em] text-ink">
           VERBO
         </h1>
         <p className="text-[0.75rem] text-label">Bíblia. Fé. Conhecimento.</p>
       </header>
 
-      {opening && (
-        <section className="mt-10 mb-12">
-          <p className="scripture text-[1.5rem] leading-[1.45] text-ink">
-            {opening.text}
-          </p>
-          <Link
-            href="/biblia/Ps/23"
-            className="anchor-ref mt-4 inline-block no-underline"
-          >
-            Salmos 23:1
-          </Link>
-        </section>
-      )}
+      <OpeningVerse />
 
       <Testament title="Antigo Testamento" books={OLD_TESTAMENT} />
       <Testament title="Novo Testamento" books={NEW_TESTAMENT} />
 
-      <p className="mt-12 max-w-prose text-[0.8125rem] leading-relaxed text-label">
-        O texto exibido é uma amostra de desenvolvimento e não serve para
-        estudo. A tradução definitiva entra depois da verificação de licença.
-      </p>
+      <Attribution className="mt-12 max-w-prose" />
     </div>
   );
 }
