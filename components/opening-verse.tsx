@@ -37,7 +37,7 @@ export function OpeningVerse() {
       <p className="scripture text-[1.5rem] leading-[1.45] text-ink">{texto}</p>
       <Link
         href={`/biblia/${ABERTURA.osis}/${ABERTURA.capitulo}#v${ABERTURA.versiculo}`}
-        className="anchor-ref mt-4 inline-block no-underline"
+        className="alvo-toque anchor-ref mt-4 inline-block no-underline"
       >
         {ABERTURA.rotulo}
       </Link>

@@ -387,6 +387,64 @@ Na saída da função:
 Todo descarte vira log. **A taxa de citação inventada é a métrica de
 credibilidade do VERBO** e deve ser olhada toda semana do beta.
 
+### Acessibilidade é requisito, não recurso
+
+O VERBO é um app de leitura. Quem tem baixa visão, dificuldade de leitura ou
+prefere ouvir não é um público secundário — é uma parte grande de quem lê a
+Bíblia. Acessibilidade entra como requisito arquitetural, com contratos
+definidos desde já e implementação junto do leitor.
+
+**Uma propriedade do produto torna isso mais fácil aqui do que em quase
+qualquer outro lugar:** a leitura em áudio **não precisa de IA**. O texto já
+está validado no Postgres; o TTS apenas transforma texto em voz.
+
+```
+PostgreSQL  →  texto bíblico validado  →  TTS  →  áudio
+```
+
+A regra de ouro fica intacta: **a IA não é a fonte da Escritura, e no áudio
+ela não participa nem da leitura.**
+
+E o inverso também vale, pela recomendação da W3C: **áudio sozinho não atende
+quem é surdo ou tem perda auditiva.** O texto nunca é substituído pelo áudio —
+os dois convivem, e o destaque sincronizado serve aos dois públicos ao mesmo
+tempo.
+
+#### Piso medido, não declarado
+
+`npm run audit:a11y` roda o navegador e afere critérios da WCAG 2.2 que dá
+para medir sem opinião: idioma declarado, nome acessível em todo controle,
+um único `h1` e hierarquia sem saltos, foco de teclado visível, movimento
+respeitando `prefers-reduced-motion`, e **tamanho de alvo de ponteiro de pelo
+menos 24×24** (SC 2.5.8).
+
+A auditoria pegou uma falha real que a inspeção visual não pegaria: as setas
+de navegação de capítulo tinham **15×20 px** — pequenas demais para qualquer
+mão, não só para quem tem limitação motora.
+
+Uma lição do conserto ficou no CSS: a primeira tentativa usou um `::after`
+absoluto para ampliar a área de toque sem mexer no layout. Funcionava para o
+dedo, mas **não muda o retângulo do elemento**, então nenhuma ferramenta de
+auditoria conseguia ver. Truque invisível para quem mede é pior que solução
+simples — virou preenchimento de verdade.
+
+Isto é um piso, não um certificado: não substitui teste com leitor de tela
+real nem com pessoas.
+
+#### Escopo
+
+**MVP, junto do leitor:** fonte ajustável, tamanho próprio para o texto
+bíblico, alto contraste, tema claro e escuro, compatibilidade com leitor de
+tela, botão de ouvir o capítulo, controle de velocidade, play/pause e
+continuar de onde parou.
+
+**V1.1:** destaque sincronizado do versículo em leitura, ouvir a partir de um
+versículo, áudio em segundo plano e tela bloqueada, cache do áudio,
+espaçamento de linha ajustável, atalhos de teclado.
+
+**Depois:** Libras, modo de leitura simplificada, recursos para dislexia,
+preferências sincronizadas entre dispositivos.
+
 ### Invariante visual: vermelho significa citação verificada
 
 Não é decisão de layout, é regra de produto, e vale para toda tela nova.
@@ -403,6 +461,17 @@ falas de Cristo, então as letras vermelhas da Escritura ficaram sem dados
 Se um dia entrar uma tradução com marcação de falas de Cristo, essa
 reintrodução precisa ser pesada contra este invariante — dois usos do
 vermelho enfraquecem os dois.
+
+**A cor reforça, nunca carrega sozinha.** O critério 1.4.1 da WCAG proíbe
+depender só de cor, e a âncora não depende: ela tem filete à esquerda,
+recuo, a referência em tipo sem serifa e o versículo em serifa. Mas o que
+prova que a citação é verdadeira não é nenhum desses sinais — **é o próprio
+texto do versículo estar ali**, tirado do banco. Quem não distingue o
+vermelho continua vendo a Escritura e podendo conferi-la.
+
+Regra derivada para telas novas: se algum dia a distinção entre Escritura e
+interpretação depender apenas da cor, ela precisa ganhar um segundo sinal
+antes de entrar.
 
 ### O extrator devolve DUAS listas, e isso não é detalhe
 

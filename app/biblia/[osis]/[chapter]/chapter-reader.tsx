@@ -67,14 +67,14 @@ export function ChapterReader({
   return (
     <article className="mx-auto max-w-3xl px-5 pt-6 pb-4">
       <nav className="flex items-baseline justify-between border-b border-hairline pb-3">
-        <Link href="/" className="text-[0.8125rem] text-label no-underline">
+        <Link href="/" className="alvo-toque text-[0.8125rem] text-label no-underline">
           Bíblia
         </Link>
         <div className="flex items-baseline gap-4 text-[0.8125rem]">
           {chapter > 1 && (
             <Link
               href={`/biblia/${book.osis}/${chapter - 1}`}
-              className="text-label no-underline"
+              className="alvo-toque text-label no-underline"
               aria-label="Capítulo anterior"
             >
               ‹ {chapter - 1}
@@ -83,7 +83,7 @@ export function ChapterReader({
           {chapter < book.chapters && (
             <Link
               href={`/biblia/${book.osis}/${chapter + 1}`}
-              className="text-label no-underline"
+              className="alvo-toque text-label no-underline"
               aria-label="Próximo capítulo"
             >
               {chapter + 1} ›

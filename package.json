@@ -15,7 +15,8 @@
     "gen:counts": "node scripts/import/gen-canon-counts.mjs",
     "import:dry": "tsx scripts/import/dry-run.ts",
     "import:bible": "tsx scripts/import/import-bible.ts",
-    "audit:rls": "node scripts/db/audit-rls.mjs"
+    "audit:rls": "node scripts/db/audit-rls.mjs",
+    "audit:a11y": "node scripts/audit-a11y.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",

@@ -41,7 +41,7 @@ export function Attribution({ className = "" }: { className?: string }) {
           href={info.licenseUrl}
           target="_blank"
           rel="noreferrer license"
-          className="underline decoration-hairline underline-offset-2"
+          className="alvo-toque-inline underline decoration-hairline underline-offset-2"
         >
           {info.name}
         </a>

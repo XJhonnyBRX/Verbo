@@ -32,7 +32,7 @@ export default function ContaPage() {
 
       <Link
         href="/"
-        className="anchor-ref mt-8 inline-block no-underline"
+        className="alvo-toque anchor-ref mt-8 inline-block no-underline"
       >
         Voltar à Bíblia
       </Link>

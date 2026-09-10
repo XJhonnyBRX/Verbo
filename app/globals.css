@@ -161,6 +161,30 @@ body {
    Acessibilidade
 --------------------------------------------------------------------------- */
 
+/* Alvo de toque mínimo.
+   WCAG 2.2 SC 2.5.8 exige 24x24 CSS px para alvo de ponteiro.
+   Medido: as setas de capítulo tinham 15x20 — pequenas demais para
+   qualquer mão, não só para quem tem limitação motora.
+
+   A primeira tentativa usou um ::after absoluto para ampliar a área sem
+   mexer no layout. Funcionava para o dedo, mas NAO muda o retângulo do
+   elemento — nem a nossa auditoria nem nenhuma ferramenta externa
+   conseguiam ver. Truque invisível para quem mede é pior que solução
+   simples: virou preenchimento de verdade. */
+.alvo-toque {
+  display: inline-block;
+  min-height: 44px;
+  min-width: 44px;
+  padding-block: 0.6875rem;
+  padding-inline: 0.375rem;
+}
+
+/* Em texto corrido, `inline-block` quebraria a linha. Aqui o preenchimento
+   vertical aumenta o retângulo sem empurrar as linhas vizinhas. */
+.alvo-toque-inline {
+  padding-block: 0.75rem;
+}
+
 :focus-visible {
   outline: 2px solid var(--rubric);
   outline-offset: 3px;
