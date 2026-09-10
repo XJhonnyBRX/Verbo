@@ -54,14 +54,22 @@ const LOTE = Number(process.env.LOTE ?? 64);
 
 function criarProvider(): EmbeddingProvider {
   if (MODELO.startsWith("gemini")) {
-    const apiKey = process.env.GOOGLE_API_KEY;
-    if (!apiKey) {
-      console.error(
-        "falta GOOGLE_API_KEY em .env.local para usar embeddings do Gemini.",
-      );
+    /* Aceita uma chave ou varias. Cada projeto do Google tem cota propria,
+       entao mais chaves significa mais vazao -- e resiliencia: uma chave
+       estrangulada sai de cena enquanto as outras seguem. */
+    const chaves = [
+      process.env.GOOGLE_API_KEY,
+      process.env.GOOGLE_API_KEY_2,
+      process.env.GOOGLE_API_KEY_3,
+      ...(process.env.GOOGLE_API_KEYS ?? "").split(","),
+    ].filter((k): k is string => Boolean(k?.trim()));
+
+    if (chaves.length === 0) {
+      console.error("falta GOOGLE_API_KEY em .env.local para usar o Gemini.");
       process.exit(1);
     }
-    return new GeminiEmbeddings({ apiKey, dimensions: DIMS });
+    console.log(`chaves : ${chaves.length}`);
+    return new GeminiEmbeddings({ apiKey: chaves, dimensions: DIMS });
   }
   return new LocalEmbeddings({ model: MODELO, lote: LOTE });
 }

@@ -29,28 +29,82 @@ interface Resposta {
 }
 
 export interface GeminiOptions {
-  apiKey: string;
+  /** Uma ou mais chaves. Com várias, a que for estrangulada sai de cena. */
+  apiKey: string | string[];
   /** 128 a 3072. Recomendadas: 768, 1536, 3072. */
   dimensions?: number;
   /** Título usado na instrução de documento. */
   titulo?: string;
 }
 
+interface Chave {
+  valor: string;
+  /** Timestamp até quando esta chave está de castigo por 429. */
+  bloqueadaAte: number;
+  usos: number;
+  falhas: number;
+}
+
 export class GeminiEmbeddings implements EmbeddingProvider {
   readonly model = "gemini-embedding-2";
   readonly dimensions: number;
 
-  private readonly apiKey: string;
+  private readonly chaves: Chave[];
   private readonly titulo: string;
+  private proxima = 0;
 
   constructor({ apiKey, dimensions = 768, titulo = "Bíblia" }: GeminiOptions) {
-    if (!apiKey) throw new Error("GeminiEmbeddings exige apiKey");
+    const lista = (Array.isArray(apiKey) ? apiKey : [apiKey])
+      .map((k) => k.trim())
+      .filter(Boolean);
+
+    if (lista.length === 0) throw new Error("GeminiEmbeddings exige ao menos uma apiKey");
     if (dimensions < 128 || dimensions > 3072) {
       throw new Error(`dimensão fora da faixa suportada (128–3072): ${dimensions}`);
     }
-    this.apiKey = apiKey;
+
+    this.chaves = lista.map((valor) => ({
+      valor,
+      bloqueadaAte: 0,
+      usos: 0,
+      falhas: 0,
+    }));
     this.dimensions = dimensions;
     this.titulo = titulo;
+  }
+
+  /**
+   * Próxima chave utilizável, em rodízio.
+   *
+   * Cada chave tem cota própria, então uma que levou 429 fica de castigo pelo
+   * tempo que a API pediu enquanto as outras seguem trabalhando. Se todas
+   * estiverem bloqueadas, devolve a que se libera primeiro e o chamador
+   * espera — melhor esperar a certa do que insistir na errada.
+   */
+  private escolher(): { chave: Chave; esperar: number } {
+    const agora = Date.now();
+
+    for (let i = 0; i < this.chaves.length; i++) {
+      const c = this.chaves[(this.proxima + i) % this.chaves.length];
+      if (c.bloqueadaAte <= agora) {
+        this.proxima = (this.proxima + i + 1) % this.chaves.length;
+        return { chave: c, esperar: 0 };
+      }
+    }
+
+    const maisCedo = this.chaves.reduce((a, b) =>
+      a.bloqueadaAte <= b.bloqueadaAte ? a : b,
+    );
+    return { chave: maisCedo, esperar: maisCedo.bloqueadaAte - agora };
+  }
+
+  /** Quantas chamadas cada chave absorveu, e quantas levaram 429. */
+  estatisticas(): Array<{ final: string; usos: number; falhas: number }> {
+    return this.chaves.map((c) => ({
+      final: `…${c.valor.slice(-4)}`,
+      usos: c.usos,
+      falhas: c.falhas,
+    }));
   }
 
   /**
@@ -75,11 +129,18 @@ export class GeminiEmbeddings implements EmbeddingProvider {
     let ultimoErro = "";
 
     for (let tentativa = 1; tentativa <= 8; tentativa++) {
+      const { chave, esperar } = this.escolher();
+      if (esperar > 0) {
+        // Todas de castigo: espera a que se libera primeiro.
+        await new Promise((res) => setTimeout(res, esperar + 250));
+      }
+
+      chave.usos++;
       const r = await fetch(ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey,
+          "x-goog-api-key": chave.valor,
         },
         body: JSON.stringify({
           model: "models/gemini-embedding-2",
@@ -97,12 +158,22 @@ export class GeminiEmbeddings implements EmbeddingProvider {
       }
 
       const corpo = await r.text();
-      ultimoErro = `${r.status} ${corpo.slice(0, 200)}`;
+      ultimoErro = `${r.status} ${corpo.slice(0, 260)}`;
 
-      if (r.status === 429 || r.status >= 500) {
+      if (r.status === 429) {
+        chave.falhas++;
         const pedida = GeminiEmbeddings.esperaPedida(corpo);
-        const espera = pedida ?? Math.min(1000 * 2 ** (tentativa - 1), 60_000);
-        await new Promise((res) => setTimeout(res, espera));
+        /* Cota diária esgotada não se resolve em 40 segundos. Quando a API
+           não diz quanto esperar num 429, tratamos como diária e tiramos a
+           chave de circulação por uma hora — insistir só queima tentativa. */
+        chave.bloqueadaAte = Date.now() + (pedida ?? 3_600_000);
+        continue;
+      }
+
+      if (r.status >= 500) {
+        await new Promise((res) =>
+          setTimeout(res, Math.min(1000 * 2 ** (tentativa - 1), 60_000)),
+        );
         continue;
       }
       break;
@@ -126,7 +197,13 @@ export class GeminiEmbeddings implements EmbeddingProvider {
    * `GEMINI_RPM` permite subir isso quando houver faturamento ativo — o
    * limite pago é muito maior.
    */
-  private readonly rpm = Number(process.env.GEMINI_RPM ?? 95);
+  /* 95 por minuto POR CHAVE, com margem sob o teto de 100 medido no free
+     tier. Correr até o limite e absorver o 429 desperdiça a chamada e ainda
+     impõe castigo; segurar o ritmo é mais rápido no total.
+     GEMINI_RPM sobe isso quando houver faturamento ativo. */
+  private get rpm(): number {
+    return Number(process.env.GEMINI_RPM ?? 95) * this.chaves.length;
+  }
   private janela: number[] = [];
 
   private async aguardarVaga(): Promise<void> {
