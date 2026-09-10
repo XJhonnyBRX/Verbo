@@ -14,7 +14,8 @@
     "verify:schema": "node scripts/db/verify-schema.mjs",
     "gen:counts": "node scripts/import/gen-canon-counts.mjs",
     "import:dry": "tsx scripts/import/dry-run.ts",
-    "import:bible": "tsx scripts/import/import-bible.ts"
+    "import:bible": "tsx scripts/import/import-bible.ts",
+    "audit:rls": "node scripts/db/audit-rls.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.1",
