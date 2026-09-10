@@ -164,6 +164,26 @@ ingestão   → 15.246 chunks, uma vez        ─┐
 consulta   → 1 embedding por pergunta      ─┘   (no free tier)
 ```
 
+### O lote não contorna a cota — medido
+
+Antes de escolher entre esperar dias e medir um subconjunto, valia checar se
+a pergunta era necessária. A API expõe `batchEmbedContents`, que aceita
+vários textos numa requisição HTTP. Se a cota contasse requisições, um lote de
+100 reduziria a Bíblia inteira a 153 chamadas.
+
+Ela não conta requisições. Conta textos.
+
+Enviando lotes de 8 em sequência, o 429 chegou na **13ª requisição**, depois de
+**96 embeddings**, contra `limit: 100`. O limite é por texto embedado, e o
+lote é apenas uma forma de empacotar — não um desconto.
+
+O que o lote entrega de verdade: os vetores são idênticos aos da chamada
+unitária (similaridade 1,000000), então dá para usá-lo por conveniência sem
+mudar nenhum resultado.
+
+**Consequência aritmética.** 15.246 chunks, 1.000 por dia por chave, duas
+chaves: **8 dias** de geração. Não 14 — e nem uma tarde.
+
 **E os dois custos são de naturezas diferentes**, o que muda o peso de cada
 um na decisão:
 
@@ -236,3 +256,58 @@ qualquer corpus vetorial em produção.
 **O e5 não é descartado mesmo que o Gemini vença.** A abstração
 `EmbeddingProvider` permite manter os dois intercambiáveis, e um provedor
 local sem custo por chamada é um fallback que vale ter.
+
+---
+
+## O que um benchmark parcial pode e não pode decidir
+
+Registrado **antes** de rodar, porque a regra de leitura de um experimento
+enviesado só vale se for escrita enquanto o resultado é desconhecido.
+
+A pergunta que decide o Ciclo 4.1 tem duas metades, e elas custam coisas
+muito diferentes de medir:
+
+> Gemini resolve os casos em que E5/GTE falharam **sem criar novos falsos
+> positivos relevantes?**
+
+| Metade | Mede o quê | Dá para medir num subconjunto? |
+|---|---|---|
+| «resolve os casos conhecidos» | as 5 armadilhas já documentadas | **sim** |
+| «sem criar novos falsos positivos» | armadilhas ainda desconhecidas | **não, por construção** |
+
+A segunda metade não é cara de medir num subconjunto — é **impossível**. Um
+falso positivo é uma passagem que ninguém esperava que vencesse. Um
+subconjunto curado contém exatamente as passagens que alguém esperava. Os
+~13.300 chunks de fora são justamente onde as surpresas moram.
+
+### A assimetria que isso cria
+
+O subconjunto adversarial é montado a partir das falhas **conhecidas**, e as
+falhas conhecidas são todas do e5 e do gte. Então:
+
+- as fraquezas do incumbente estão presentes, porque nós as catalogamos;
+- as fraquezas do desafiante estão ausentes, porque ainda não as vimos.
+
+O subconjunto é um **jogo em casa para o Gemini**. Não por descuido de
+montagem: é uma propriedade inevitável de curar um corpus a partir de erros
+que só um dos lados cometeu.
+
+### Regra de leitura, fixada agora
+
+Um benchmark parcial é um **falsificador**, nunca um aprovador:
+
+| Resultado no subconjunto | O que se pode concluir |
+|---|---|
+| Gemini **falha** as armadilhas | **decisão fechada: não.** Falhou em condições favoráveis a ele. Segue para hybrid + reranking. |
+| Gemini **passa** | **nada decidido.** A vitória pode ser artefato dos distratores ausentes. A metade 2 continua exigindo o corpus inteiro. |
+
+O valor esperado é assimétrico e favorável: custa ~1.900 embeddings a chance
+de encerrar a questão hoje, e não existe caminho pelo qual ele produza uma
+adoção equivocada — porque a adoção não está entre os resultados possíveis.
+
+### Condição de validade
+
+Rodar o parcial **não pode tocar em `scripts/embed/queries.ts` nem na
+verdade-base v2.** Se o subconjunto revelar uma armadilha nova e ela for
+acrescentada à régua, a auditoria de viés se reabre e os 51% contra 17% já
+registrados deixam de ser comparáveis. A régua está congelada.
