@@ -406,9 +406,13 @@ A regra de ouro fica intacta: **a IA não é a fonte da Escritura, e no áudio
 ela não participa nem da leitura.**
 
 E o inverso também vale, pela recomendação da W3C: **áudio sozinho não atende
-quem é surdo ou tem perda auditiva.** O texto nunca é substituído pelo áudio —
-os dois convivem, e o destaque sincronizado serve aos dois públicos ao mesmo
-tempo.
+quem é surdo ou tem perda auditiva.**
+
+> **Invariante: o áudio nunca substitui o texto bíblico.**
+
+Os dois convivem sempre. O destaque sincronizado do versículo em leitura não
+é enfeite: é o que faz uma só interface servir a quem ouve e a quem lê ao
+mesmo tempo.
 
 #### Piso medido, não declarado
 
@@ -462,16 +466,34 @@ Se um dia entrar uma tradução com marcação de falas de Cristo, essa
 reintrodução precisa ser pesada contra este invariante — dois usos do
 vermelho enfraquecem os dois.
 
-**A cor reforça, nunca carrega sozinha.** O critério 1.4.1 da WCAG proíbe
-depender só de cor, e a âncora não depende: ela tem filete à esquerda,
-recuo, a referência em tipo sem serifa e o versículo em serifa. Mas o que
-prova que a citação é verdadeira não é nenhum desses sinais — **é o próprio
-texto do versículo estar ali**, tirado do banco. Quem não distingue o
-vermelho continua vendo a Escritura e podendo conferi-la.
+**O vermelho é linguagem visual, não mecanismo de verdade.** A hierarquia é
+esta, e a ordem importa:
 
-Regra derivada para telas novas: se algum dia a distinção entre Escritura e
-interpretação depender apenas da cor, ela precisa ganhar um segundo sinal
-antes de entrar.
+| Camada | O que é |
+|---|---|
+| **Fonte da verdade** | PostgreSQL, com a referência validada por chave estrangeira |
+| **Evidência** | o texto do versículo, apresentado na tela |
+| **Sinal visual** | o vermelho |
+
+**O usuário não precisa enxergar vermelho para saber que aquilo é Escritura
+verificável.** A âncora tem filete, recuo e contraste de tipo — mas o que
+prova a citação não é nenhum desses sinais: é o próprio texto do versículo
+estar ali, tirado do banco. Retire a cor e a verificabilidade permanece
+inteira.
+
+#### Regra geral: nenhum estado funcional depende só de cor
+
+Vale para toda tela futura, não só para a âncora. Um exemplo do que **não**
+pode entrar:
+
+```
+🔴 Processado        ← estado carregado só pela cor
+⚪ Pendente
+```
+
+Isso precisa de texto, ícone ou estado semântico junto. O critério 1.4.1 da
+WCAG é o piso; a razão de produto é mais simples: um sinal que some para
+parte dos usuários não é um sinal.
 
 ### O extrator devolve DUAS listas, e isso não é detalhe
 

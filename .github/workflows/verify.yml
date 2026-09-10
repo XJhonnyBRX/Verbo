@@ -1,0 +1,41 @@
+# Verificações do VERBO em cada push e pull request.
+#
+# NÃO PRECISA DE NENHUM SEGREDO, e isso é consequência de uma decisão
+# anterior: as variáveis do Supabase são publicáveis e vivem no .env
+# versionado, porque quem protege os dados é o RLS. A própria auditoria de
+# RLS roda aqui com a chave anônima e prova isso a cada push.
+#
+# O que fica de fora e por quê:
+#   verify:schema  precisa de Docker e leva minutos; roda local com
+#                  `npm run verify -- --schema`
+#   benchmark      precisa de chave paga e horas de execução
+
+name: verificações
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: instalar dependências
+        run: npm ci
+
+      # O Playwright roda a interface e a acessibilidade num navegador real.
+      - name: instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: verificar tudo
+        run: npm run verify

@@ -3,7 +3,19 @@
  * Roda antes de publicar a chave num repositorio publico: se o anon puder
  * escrever ou ler o que nao deve, a chave deixa de ser segura para expor.
  */
-process.loadEnvFile(".env.local");
+/* .env.local traz segredos e sobrepoe; .env traz a configuracao publica.
+   No CI so existe o segundo, e isso basta: esta auditoria usa a chave
+   ANONIMA de proposito, porque e ela que vai para o bundle do cliente. */
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  /* sem .env.local: seguimos com o .env versionado */
+}
+try {
+  process.loadEnvFile(".env");
+} catch {
+  /* nem .env: as variaveis podem vir do ambiente */
+}
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const k = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const H = { apikey: k, Authorization: `Bearer ${k}`, "Content-Type": "application/json" };
