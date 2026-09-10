@@ -1,0 +1,347 @@
+[
+  {
+    "meta": {
+      "modelo": "Xenova/multilingual-e5-small",
+      "dims": 384,
+      "chunks": 15246,
+      "consultas": 16,
+      "segundos": 1705,
+      "porSegundo": 9,
+      "geradoEm": "2026-09-10T05:13:16.618Z"
+    },
+    "float32": {
+      "versao": "v2-sem-vies",
+      "hit10": 0.625,
+      "mrr10": 0.3287202380952381,
+      "nota": 0.5057440476190476,
+      "porFamilia": {
+        "tema": {
+          "hit10": 0.7,
+          "mrr10": 0.3866666666666666,
+          "n": 10
+        },
+        "parafrase": {
+          "hit10": 0.5,
+          "mrr10": 0.23214285714285712,
+          "n": 6
+        }
+      },
+      "verdes": 4,
+      "amarelos": 6,
+      "vermelhos": 6,
+      "detalhe": [
+        {
+          "pergunta": "dinheiro e riqueza",
+          "familia": "tema",
+          "posicao": 6,
+          "sinal": "amarelo",
+          "topo": "1Tim 6:17-19",
+          "topoTexto": "Manda aos ricos desta era que não sejam soberbos, nem ponham a esperança na incerteza das riquezas, mas sim em Deus, que nos dá abundantemente todas as coisas que são para alegria; que façam o bem, sejam ricos em boas obras, dispostos a compartilhar, e generosos. que acumulem para si mesmos um bom fundamento para o futuro, para que obtenham a verdadeira vida.",
+          "acertou": "1Tim 6:10"
+        },
+        {
+          "pergunta": "ansiedade",
+          "familia": "tema",
+          "posicao": 4,
+          "sinal": "amarelo",
+          "topo": "Matt 6:27-29",
+          "topoTexto": "E qual de vós poderá, por sua ansiedade, acrescentar um côvado à sua estatura? E por que andais ansiosos pela roupa? Prestai atenção aos lírios do campo, como crescem; eles nem trabalham nem fiam. Mas eu vos digo que nem mesmo Salomão, em toda a sua glória, se vestiu como um deles.",
+          "acertou": "1Pet 5:7"
+        },
+        {
+          "pergunta": "perdão",
+          "familia": "tema",
+          "posicao": 4,
+          "sinal": "amarelo",
+          "topo": "Luke 17:3-5",
+          "topoTexto": "Olhai por vós. E se teu irmão pecar contra ti, repreende-o; e se ele se arrepender, perdoa-lhe. E se pecar contra ti sete vezes ao dia, e se sete vezes ao dia voltar a ti, dizendo: Estou arrependido. Perdoa-lhe. E os apóstolos disseram ao Senhor: Acrescenta-nos fé.",
+          "acertou": "Mark 11:25"
+        },
+        {
+          "pergunta": "amor ao próximo",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Rom 13:9-11",
+          "topoTexto": "Porque estes mandamentos: não adulterarás, não matarás, não roubarás, não cobiçarás; e qualquer outro mandamento que há, nesta frase se resumem: “Amarás ao teu próximo como a ti mesmo”. O amor não faz mal ao próximo. Assim, o cumprimento da Lei é o amor. Além disso, conheceis o tempo, que já é hora de despertardes do sono, porque a salvação está agora mais perto de nós do que quando começamos a crer.",
+          "acertou": "Rom 13:9"
+        },
+        {
+          "pergunta": "medo",
+          "familia": "tema",
+          "posicao": 5,
+          "sinal": "amarelo",
+          "topo": "Lam 3:47-49",
+          "topoTexto": "Medo e cova vieram sobre nós, devastação e destruição. Rios de águas correm de meus olhos, por causa da destruição da filha de meu povo. Meus olhos destilam, e não cessam; não haverá descanso,",
+          "acertou": "Ps 56:3"
+        },
+        {
+          "pergunta": "salvação",
+          "familia": "tema",
+          "posicao": 29,
+          "sinal": "vermelho",
+          "topo": "Ps 3:7-8",
+          "topoTexto": "Levanta-te, SENHOR, salva-me, meu Deus; pois feriste os queixos de todos meus inimigos; e quebraste os dentes dos maus. A salvação vem do SENHOR; sobre o teu povo seja tua bênção. (Selá)",
+          "acertou": "Rom 10:9"
+        },
+        {
+          "pergunta": "humildade",
+          "familia": "tema",
+          "posicao": 14,
+          "sinal": "vermelho",
+          "topo": "Ps 89:51-52",
+          "topoTexto": "Com humilhação os teus inimigos insultam, SENHOR, com a qual insultam os passos do teu ungido. Bendito seja o SENHOR para todo o sempre. Amém, e Amém.",
+          "acertou": "1Pet 5:5"
+        },
+        {
+          "pergunta": "tentação",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Jas 1:13-15",
+          "topoTexto": "Ninguém, quando for tentado, diga: “Sou tentado por Deus”; porque Deus não é tentado pelo mal, e ele mesmo tenta ninguém; Mas cada um é tentado quando é atraído e seduzido pelo seu próprio mau desejo. Depois do mau desejo ter concebido, dá à luz o pecado; e o pecado, quando é completado, gera a morte.",
+          "acertou": "Jas 1:13"
+        },
+        {
+          "pergunta": "paz",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Phil 4:7-9",
+          "topoTexto": "e a paz de Deus, que excede todo entendimento, guardará os vossos corações e as vossas mentes em Cristo Jesus. No restante, meus irmãos, tudo o que é verdadeiro, tudo o que é respeitável, tudo o que é justo, tudo o que é puro, tudo o que é amável, tudo o que é de boa fama, se há alguma virtude, e se há algo digno de elogio, nisto pensai. O que também aprendestes, recebestes, ouvistes, e vistes em mim, isso fazei; e o Deus da paz será convosco.",
+          "acertou": "Phil 4:7"
+        },
+        {
+          "pergunta": "sofrimento",
+          "familia": "tema",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Eccl 7:3-5",
+          "topoTexto": "Melhor é o sofrimento do que o riso, porque com a tristeza do rosto o coração se aperfeiçoa. O coração dos sábios está na casa do luto, mas o coração dos tolos está na casa da alegria. Melhor é ouvir a repreensão do sábio do que alguém ouvir a canção dos tolos;",
+          "acertou": null
+        },
+        {
+          "pergunta": "Como lidar com preocupação sobre o futuro?",
+          "familia": "parafrase",
+          "posicao": 4,
+          "sinal": "amarelo",
+          "topo": "Ps 37:5-7",
+          "topoTexto": "Conduz teu caminho ao SENHOR, e confia nele; e ele lhe fará o bem. E ele manifestará tua justiça como a luz; e teu direito como o sol do meio-dia. Descansa-te no SENHOR, e espera por ele; não te irrites contra aquele cujo caminho prospera, nem com o homem que planeja maldades.",
+          "acertou": "Jer 29:11"
+        },
+        {
+          "pergunta": "O que a Bíblia ensina sobre acumular bens?",
+          "familia": "parafrase",
+          "posicao": 7,
+          "sinal": "amarelo",
+          "topo": "Luke 18:23-25",
+          "topoTexto": "Mas ele, ouvindo isto, ficou muito triste, porque era muito rico. E vendo Jesus que ele tinha ficado muito triste, disse: Como é difícil os que têm muitos bens entrarem no Reino de Deus! Porque é mais fácil um camelo entrar pelo olho de uma agulha do que um rico entrar no Reino de Deus.",
+          "acertou": "Eccl 5:10"
+        },
+        {
+          "pergunta": "Como agir quando alguém me machuca?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Job 41:1-3",
+          "topoTexto": "Poderás tu pescar ao leviatã com anzol, ou abaixar sua língua com uma corda? Podes pôr um anzol em seu nariz, ou com um espinho furar sua queixada? Fará ele súplicas a ti, ou falará contigo suavemente?",
+          "acertou": null
+        },
+        {
+          "pergunta": "Onde encontro conforto durante uma dificuldade?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "2Tim 4:21-22",
+          "topoTexto": "Procura vir antes do inverno. Êubulo, Pudente, Lino, Cláudia e todos os irmãos te cumprimentam. O Senhor seja com o teu espírito. A graça seja convosco.",
+          "acertou": null
+        },
+        {
+          "pergunta": "O que fazer quando estou com medo?",
+          "familia": "parafrase",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Ps 56:3-5",
+          "topoTexto": "No dia em que eu tiver medo, eu confiarei em ti. Por causa de Deus eu louvarei sua palavra; confio em Deus, não temerei; o que a carne pode fazer contra mim? Todos os dias eles distorcem minhas palavras; todos os pensamentos deles sobre mim são para o mal.",
+          "acertou": "Ps 56:3"
+        },
+        {
+          "pergunta": "Como tratar uma pessoa que me fez mal?",
+          "familia": "parafrase",
+          "posicao": 23,
+          "sinal": "vermelho",
+          "topo": "Ps 109:21-23",
+          "topoTexto": "Porém tu, Senhor DEUS, me trata bem por causa do teu nome; por ser boa a tua misericórdia, livra-me; Porque estou aflito e necessitado; e meu coração está ferido dentro de mim. Eu vou como a sombra, que declina; estou sendo sacudido como um gafanhoto.",
+          "acertou": "Rom 12:17"
+        }
+      ]
+    },
+    "float16": {
+      "versao": "v2-sem-vies",
+      "hit10": 0.625,
+      "mrr10": 0.3287202380952381,
+      "nota": 0.5057440476190476,
+      "porFamilia": {
+        "tema": {
+          "hit10": 0.7,
+          "mrr10": 0.3866666666666666,
+          "n": 10
+        },
+        "parafrase": {
+          "hit10": 0.5,
+          "mrr10": 0.23214285714285712,
+          "n": 6
+        }
+      },
+      "verdes": 4,
+      "amarelos": 6,
+      "vermelhos": 6,
+      "detalhe": [
+        {
+          "pergunta": "dinheiro e riqueza",
+          "familia": "tema",
+          "posicao": 6,
+          "sinal": "amarelo",
+          "topo": "1Tim 6:17-19",
+          "topoTexto": "Manda aos ricos desta era que não sejam soberbos, nem ponham a esperança na incerteza das riquezas, mas sim em Deus, que nos dá abundantemente todas as coisas que são para alegria; que façam o bem, sejam ricos em boas obras, dispostos a compartilhar, e generosos. que acumulem para si mesmos um bom fundamento para o futuro, para que obtenham a verdadeira vida.",
+          "acertou": "1Tim 6:10"
+        },
+        {
+          "pergunta": "ansiedade",
+          "familia": "tema",
+          "posicao": 4,
+          "sinal": "amarelo",
+          "topo": "Matt 6:27-29",
+          "topoTexto": "E qual de vós poderá, por sua ansiedade, acrescentar um côvado à sua estatura? E por que andais ansiosos pela roupa? Prestai atenção aos lírios do campo, como crescem; eles nem trabalham nem fiam. Mas eu vos digo que nem mesmo Salomão, em toda a sua glória, se vestiu como um deles.",
+          "acertou": "1Pet 5:7"
+        },
+        {
+          "pergunta": "perdão",
+          "familia": "tema",
+          "posicao": 4,
+          "sinal": "amarelo",
+          "topo": "Luke 17:3-5",
+          "topoTexto": "Olhai por vós. E se teu irmão pecar contra ti, repreende-o; e se ele se arrepender, perdoa-lhe. E se pecar contra ti sete vezes ao dia, e se sete vezes ao dia voltar a ti, dizendo: Estou arrependido. Perdoa-lhe. E os apóstolos disseram ao Senhor: Acrescenta-nos fé.",
+          "acertou": "Mark 11:25"
+        },
+        {
+          "pergunta": "amor ao próximo",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Rom 13:9-11",
+          "topoTexto": "Porque estes mandamentos: não adulterarás, não matarás, não roubarás, não cobiçarás; e qualquer outro mandamento que há, nesta frase se resumem: “Amarás ao teu próximo como a ti mesmo”. O amor não faz mal ao próximo. Assim, o cumprimento da Lei é o amor. Além disso, conheceis o tempo, que já é hora de despertardes do sono, porque a salvação está agora mais perto de nós do que quando começamos a crer.",
+          "acertou": "Rom 13:9"
+        },
+        {
+          "pergunta": "medo",
+          "familia": "tema",
+          "posicao": 5,
+          "sinal": "amarelo",
+          "topo": "Lam 3:47-49",
+          "topoTexto": "Medo e cova vieram sobre nós, devastação e destruição. Rios de águas correm de meus olhos, por causa da destruição da filha de meu povo. Meus olhos destilam, e não cessam; não haverá descanso,",
+          "acertou": "Ps 56:3"
+        },
+        {
+          "pergunta": "salvação",
+          "familia": "tema",
+          "posicao": 29,
+          "sinal": "vermelho",
+          "topo": "Ps 3:7-8",
+          "topoTexto": "Levanta-te, SENHOR, salva-me, meu Deus; pois feriste os queixos de todos meus inimigos; e quebraste os dentes dos maus. A salvação vem do SENHOR; sobre o teu povo seja tua bênção. (Selá)",
+          "acertou": "Rom 10:9"
+        },
+        {
+          "pergunta": "humildade",
+          "familia": "tema",
+          "posicao": 14,
+          "sinal": "vermelho",
+          "topo": "Ps 89:51-52",
+          "topoTexto": "Com humilhação os teus inimigos insultam, SENHOR, com a qual insultam os passos do teu ungido. Bendito seja o SENHOR para todo o sempre. Amém, e Amém.",
+          "acertou": "1Pet 5:5"
+        },
+        {
+          "pergunta": "tentação",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Jas 1:13-15",
+          "topoTexto": "Ninguém, quando for tentado, diga: “Sou tentado por Deus”; porque Deus não é tentado pelo mal, e ele mesmo tenta ninguém; Mas cada um é tentado quando é atraído e seduzido pelo seu próprio mau desejo. Depois do mau desejo ter concebido, dá à luz o pecado; e o pecado, quando é completado, gera a morte.",
+          "acertou": "Jas 1:13"
+        },
+        {
+          "pergunta": "paz",
+          "familia": "tema",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Phil 4:7-9",
+          "topoTexto": "e a paz de Deus, que excede todo entendimento, guardará os vossos corações e as vossas mentes em Cristo Jesus. No restante, meus irmãos, tudo o que é verdadeiro, tudo o que é respeitável, tudo o que é justo, tudo o que é puro, tudo o que é amável, tudo o que é de boa fama, se há alguma virtude, e se há algo digno de elogio, nisto pensai. O que também aprendestes, recebestes, ouvistes, e vistes em mim, isso fazei; e o Deus da paz será convosco.",
+          "acertou": "Phil 4:7"
+        },
+        {
+          "pergunta": "sofrimento",
+          "familia": "tema",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Eccl 7:3-5",
+          "topoTexto": "Melhor é o sofrimento do que o riso, porque com a tristeza do rosto o coração se aperfeiçoa. O coração dos sábios está na casa do luto, mas o coração dos tolos está na casa da alegria. Melhor é ouvir a repreensão do sábio do que alguém ouvir a canção dos tolos;",
+          "acertou": null
+        },
+        {
+          "pergunta": "Como lidar com preocupação sobre o futuro?",
+          "familia": "parafrase",
+          "posicao": 4,
+          "sinal": "amarelo",
+          "topo": "Ps 37:5-7",
+          "topoTexto": "Conduz teu caminho ao SENHOR, e confia nele; e ele lhe fará o bem. E ele manifestará tua justiça como a luz; e teu direito como o sol do meio-dia. Descansa-te no SENHOR, e espera por ele; não te irrites contra aquele cujo caminho prospera, nem com o homem que planeja maldades.",
+          "acertou": "Jer 29:11"
+        },
+        {
+          "pergunta": "O que a Bíblia ensina sobre acumular bens?",
+          "familia": "parafrase",
+          "posicao": 7,
+          "sinal": "amarelo",
+          "topo": "Luke 18:23-25",
+          "topoTexto": "Mas ele, ouvindo isto, ficou muito triste, porque era muito rico. E vendo Jesus que ele tinha ficado muito triste, disse: Como é difícil os que têm muitos bens entrarem no Reino de Deus! Porque é mais fácil um camelo entrar pelo olho de uma agulha do que um rico entrar no Reino de Deus.",
+          "acertou": "Eccl 5:10"
+        },
+        {
+          "pergunta": "Como agir quando alguém me machuca?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "Job 41:1-3",
+          "topoTexto": "Poderás tu pescar ao leviatã com anzol, ou abaixar sua língua com uma corda? Podes pôr um anzol em seu nariz, ou com um espinho furar sua queixada? Fará ele súplicas a ti, ou falará contigo suavemente?",
+          "acertou": null
+        },
+        {
+          "pergunta": "Onde encontro conforto durante uma dificuldade?",
+          "familia": "parafrase",
+          "posicao": null,
+          "sinal": "vermelho",
+          "topo": "2Tim 4:21-22",
+          "topoTexto": "Procura vir antes do inverno. Êubulo, Pudente, Lino, Cláudia e todos os irmãos te cumprimentam. O Senhor seja com o teu espírito. A graça seja convosco.",
+          "acertou": null
+        },
+        {
+          "pergunta": "O que fazer quando estou com medo?",
+          "familia": "parafrase",
+          "posicao": 1,
+          "sinal": "verde",
+          "topo": "Ps 56:3-5",
+          "topoTexto": "No dia em que eu tiver medo, eu confiarei em ti. Por causa de Deus eu louvarei sua palavra; confio em Deus, não temerei; o que a carne pode fazer contra mim? Todos os dias eles distorcem minhas palavras; todos os pensamentos deles sobre mim são para o mal.",
+          "acertou": "Ps 56:3"
+        },
+        {
+          "pergunta": "Como tratar uma pessoa que me fez mal?",
+          "familia": "parafrase",
+          "posicao": 22,
+          "sinal": "vermelho",
+          "topo": "Ps 109:21-23",
+          "topoTexto": "Porém tu, Senhor DEUS, me trata bem por causa do teu nome; por ser boa a tua misericórdia, livra-me; Porque estou aflito e necessitado; e meu coração está ferido dentro de mim. Eu vou como a sombra, que declina; estou sendo sacudido como um gafanhoto.",
+          "acertou": "Rom 12:17"
+        }
+      ]
+    }
+  }
+]
