@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 
 const OUT = process.argv[2];
-const BASE = "http://localhost:3210";
+const BASE = process.argv[3] ?? "http://localhost:3210";
 
 const pages = [
   ["home", "/"],
