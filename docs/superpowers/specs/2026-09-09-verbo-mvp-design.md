@@ -336,15 +336,36 @@ por onde uma resposta gerada alcança o usuário.
 
 ```
 pergunta
+  -> CLASSIFICADOR (regra, não IA)
+       referência  -> resolve_passage, responde, FIM        [custo zero]
+       palavra     -> search_verses, responde, FIM          [custo zero]
+       tema        -> segue abaixo
   -> checa ai_usage_daily (limite diário)         [antes de qualquer custo]
-  -> checa ai_answer_cache (hash da pergunta normalizada)
+  -> checa ai_answer_cache
   -> vetoriza com gte-small (local, custo zero)
   -> hybrid_search -> versículos relevantes
+  -> PORTÃO DE EVIDÊNCIA: contexto fraco -> recusa, FIM     [custo zero]
   -> monta o contexto
   -> Gemini Flash
   -> VALIDA as referências
   -> grava e faz streaming
 ```
+
+**O classificador é de regra, nunca de IA.** Ele existe para evitar chamadas
+pagas; se chamasse um modelo para decidir se precisa de modelo, destruiria a
+economia que justifica sua existência. `parseReference` já resolve o primeiro
+caso sem tocar em rede, e a distinção entre "palavra" e "tema" é decidível
+por forma: uma ou duas palavras sem verbo é busca; frase interrogativa é tema.
+
+**O portão de evidência recusa ANTES de gastar a chamada.** Se a busca
+híbrida não trouxer contexto suficientemente relevante, o VERBO responde que
+não encontrou base bíblica para aquela pergunta — em vez de mandar um
+contexto fraco ao modelo e receber de volta uma resposta que preenche a
+lacuna com invenção.
+
+É a mesma regra de ouro chegando um passo antes. A validação de referências
+pega a invenção depois de gerada; o portão de evidência impede que ela seja
+gerada. Confiança e custo apontando para o mesmo lado.
 
 ### Validação das referências
 
@@ -365,6 +386,23 @@ Na saída da função:
 
 Todo descarte vira log. **A taxa de citação inventada é a métrica de
 credibilidade do VERBO** e deve ser olhada toda semana do beta.
+
+### Invariante visual: vermelho significa citação verificada
+
+Não é decisão de layout, é regra de produto, e vale para toda tela nova.
+
+**No VERBO, vermelho marca uma coisa só: texto bíblico com lastro conferido
+no banco.** Nunca ênfase, nunca erro, nunca botão, nunca alerta. O usuário
+tem de conseguir separar, de relance, o que é Escritura do que é
+interpretação gerada por um modelo — e a cor é o sinal mais rápido que
+existe para isso.
+
+A regra nasceu de uma restrição, não de estética: a Bíblia Livre não marca
+falas de Cristo, então as letras vermelhas da Escritura ficaram sem dados
+(ver seção 5). Sobrou um uso para a cor, e sobrar tornou o sinal inequívoco.
+Se um dia entrar uma tradução com marcação de falas de Cristo, essa
+reintrodução precisa ser pesada contra este invariante — dois usos do
+vermelho enfraquecem os dois.
 
 ### O extrator devolve DUAS listas, e isso não é detalhe
 
