@@ -150,6 +150,36 @@ descobrir quanto o embedding sozinho entrega.
 
 ---
 
+## Critério de aprovação do Gemini — registrado ANTES de medir
+
+Escrito enquanto o resultado ainda é desconhecido, de propósito. Critério
+definido depois do número não é critério, é justificativa.
+
+**Vencer o e5 não basta.** Tem de vencer de forma útil ao produto, e a ordem
+de importância é esta:
+
+1. comportamento nas paráfrases
+2. eliminação das armadilhas lexicais («salvação» → «salva-me»)
+3. MRR@10
+4. custo por 15 mil chunks e por consulta
+5. latência da consulta
+6. dimensão, e só aqui a migração de schema entra na conta
+
+**Faixas de decisão:**
+
+| Diferença na nota | Decisão |
+|---|---|
+| Gemini ≤ e5 + 5 pp | fica o e5. Não se migra `vector(384)` para `vector(768)` por margem de ruído. |
+| e5 + 5 pp a e5 + 15 pp | zona cinzenta. Decide o qualitativo: as armadilhas lexicais sumiram? Jó 41:1 e 2 Timóteo 4:21 viraram respostas plausíveis? |
+| Gemini ≥ e5 + 15 pp | adota-se o Gemini e migra-se o schema. |
+
+**E uma faixa que não é sobre comparação:** se o Gemini também apresentar as
+mesmas armadilhas lexicais, para de fazer sentido procurar «o embedding
+certo». Nesse caso o resultado do 4.1 é que o VERBO precisa de um **sistema**
+de recuperação melhor — híbrido mais reranker —, e não de um modelo melhor.
+Esse desfecho é tão útil quanto qualquer outro, e mais barato de descobrir
+agora do que depois do Ciclo 5.
+
 ## Pendente
 
 **Chave da API do Google.** Bloqueia o teste do `gemini-embedding-2` e o
