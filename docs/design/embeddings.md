@@ -389,3 +389,68 @@ SAIDA=benchmark-parcial npx tsx scripts/embed/benchmark.ts subset
 ```
 
 Os resultados do e5 e do gte neste corpus já estão em `benchmark-parcial/`.
+
+---
+
+## Conjunto reservado do portão de evidência — congelado em 2026-09-10
+
+**Impressão digital:** `d68d4e6bd2a535f52a71e36eb1abd42e950da15e6eb8abe64fa1aa6e5bc5ba0e`
+
+Escrito **antes** de existir qualquer número do Gemini, em
+`scripts/embed/calibration-set.ts`. Quarenta perguntas, nenhuma delas em
+`queries.ts`, e nenhum dos dez temas de lá reaparece — verificado por regra,
+não por leitura.
+
+### Por que ele é separado
+
+`queries.ts` selecionou o retriever. Calibrar o limiar nas mesmas consultas
+seria ajustar a régua nas perguntas em que o sistema já foi otimizado para ir
+bem — o problema v1 → v2 uma camada acima.
+
+### Três papéis, atribuídos na autoria
+
+| Papel | Quantas | Para quê |
+|---|---|---|
+| `calibracao` | 19 | escolher o limiar |
+| `avaliacao` | 18 | medir o limiar escolhido — não pode ser olhada antes |
+| `observacao` | 3 | as duas decisões são defensáveis; não entram em conta |
+
+Dividir depois, olhando o resultado, seria a mesma circularidade. Por isso o
+papel nasce junto com a pergunta.
+
+### Nove famílias, e as duas decisões
+
+Decisão esperada: **18 responder**, **9 responder com ressalva**, **13
+recusar**. Um conjunto só de perguntas respondíveis calibraria o limiar para
+baixo; só de recusas, para cima. Há asserção automática de que a calibração
+tem os dois lados.
+
+A família que mais importa é **`sem-resposta-na-escritura`**: perguntas
+bíblicas cuja resposta a Bíblia não contém — o nome da mulher de Caim, a idade
+de Maria, os anos ocultos de Jesus, o número de magos. A recuperação vai
+trazer Gênesis 4 e Lucas 2 com proximidade altíssima, e nenhum deles responde.
+É o teste mais direto da regra de ouro: recusar exatamente quando inventar é
+mais fácil.
+
+### A assimetria do erro, registrada antes de medir
+
+Os dois erros do portão não custam o mesmo. Responder sem base é a falha que o
+produto inteiro existe para impedir; recusar quando havia base é um produto
+pior, não um produto desonesto. Então o limiar **não** é escolhido maximizando
+acerto médio:
+
+1. entre os limiares com **resposta-sem-base ≤ 2%** na calibração, escolher o
+   de **menor recusa indevida**;
+2. se nenhum limiar atingir os 2%, **o assistente não é publicado**.
+
+O item 2 é o que transforma o portão de botão de ajuste em critério de
+publicação. Sem ele, «baixa esse limite» sempre vence.
+
+### O congelamento é asserção, não comentário
+
+A impressão digital está em `scripts/embed/calibration-set.sha256` e é
+conferida em `npm run verify` e no CI. Editar o conjunto quebra a suíte.
+Provado por adulteração: com o hash trocado, a etapa falha.
+
+Reabrir a reserva é um ato explícito — apagar o `.sha256`, regravar e explicar
+no commit por quê.

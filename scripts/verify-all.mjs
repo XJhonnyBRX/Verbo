@@ -54,6 +54,17 @@ await etapa("tipos", "npx", ["tsc", "--noEmit"], { silencioso: true });
 await etapa("lint", "npx", ["eslint", "."], { silencioso: true });
 await etapa("testes de unidade", "npx", ["vitest", "run"], { silencioso: true });
 
+/* O conjunto reservado do portão de evidência é imutável a partir do
+   congelamento. Sem esta etapa, «imutável» seria uma palavra num comentário —
+   e alguém poderia reescrevê-lo depois de ver o resultado do Gemini, que é
+   exatamente o que ele existe para impedir. */
+await etapa(
+  "conjunto reservado congelado",
+  "npx",
+  ["tsx", "scripts/embed/verify-calibration-set.ts"],
+  { silencioso: true },
+);
+
 // --------------------------------------------------------- banco na nuvem
 // Usa só a chave anônima, que está no .env versionado. Sem segredo.
 await etapa("RLS na nuvem", "node", ["scripts/db/audit-rls.mjs"], {
