@@ -439,9 +439,22 @@ produto inteiro existe para impedir; recusar quando havia base é um produto
 pior, não um produto desonesto. Então o limiar **não** é escolhido maximizando
 acerto médio:
 
-1. entre os limiares com **resposta-sem-base ≤ 2%** na calibração, escolher o
-   de **menor recusa indevida**;
-2. se nenhum limiar atingir os 2%, **o assistente não é publicado**.
+1. **Teto de invenção** — resposta sem base: **zero casos**. Um único caso
+   reprova o limiar. Os «2%» são a formulação matemática da política; nesta
+   reserva equivalem exatamente a tolerância zero.
+2. **Piso de utilidade** — responder a pelo menos **70%** das perguntas que
+   têm base. São 13 na calibração, então o piso é 10.
+3. Entre os limiares que passam em 1 e 2, escolher o de **menor recusa
+   indevida**.
+4. Se nenhum limiar passar em 1 e 2 ao mesmo tempo, **o assistente não é
+   publicado**.
+
+**O piso de utilidade conserta um furo lógico.** «Zero resposta sem base» é
+satisfeito trivialmente por um limiar alto o bastante para recusar tudo — quem
+nunca responde nunca inventa. Sem o piso, sempre existiria um limiar elegível,
+o item 4 nunca dispararia, e publicaríamos um assistente que só sabe dizer não
+com a política formalmente satisfeita. O piso é o que torna a não-publicação
+alcançável.
 
 O item 2 é o que transforma o portão de botão de ajuste em critério de
 publicação. Sem ele, «baixa esse limite» sempre vence.

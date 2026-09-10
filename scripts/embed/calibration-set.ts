@@ -42,18 +42,36 @@
  * Por isso o limiar NÃO é escolhido maximizando acerto médio. É escolhido
  * assim, nesta ordem:
  *
- *   1. entre os limiares com taxa de resposta-sem-base ≤ 2% no conjunto de
- *      calibração, escolher o de menor taxa de recusa indevida;
- *   2. se NENHUM limiar atingir os 2%, o assistente não é publicado.
+ *   1. TETO DE INVENÇÃO — resposta sem base: **zero casos**. Um único caso
+ *      reprova o limiar. (Os «2%» são a formulação matemática da política;
+ *      nesta reserva eles equivalem exatamente a tolerância zero — ver a
+ *      aritmética abaixo.)
+ *   2. PISO DE UTILIDADE — o limiar tem de responder a pelo menos 70% das
+ *      perguntas que TÊM base. Ver o porquê logo abaixo.
+ *   3. entre os limiares que passam em 1 e 2, escolher o de menor recusa
+ *      indevida;
+ *   4. se NENHUM limiar passar em 1 e 2 ao mesmo tempo, o assistente não é
+ *      publicado.
  *
- * O item 2 é o que transforma o portão de um botão de ajuste em critério de
+ * POR QUE O PISO DE UTILIDADE EXISTE — e por que a política estava furada sem
+ * ele. «Zero resposta sem base» é satisfeito trivialmente por um limiar alto o
+ * bastante para recusar tudo: quem nunca responde nunca inventa. Sem o piso,
+ * sempre existiria um limiar elegível, o item 4 nunca dispararia, e
+ * publicaríamos um assistente que só sabe dizer não com a política
+ * formalmente satisfeita. O piso é o que torna a não-publicação alcançável.
+ *
+ * Os 70% saem da aritmética desta reserva: a calibração tem 13 perguntas com
+ * base, então o piso é 10 delas. Não é um número sagrado — é o ponto em que
+ * um assistente ainda é útil o suficiente para valer a tela que ocupa.
+ *
+ * O conjunto é o que transforma o portão de um botão de ajuste em critério de
  * publicação. Sem ele, «baixa esse limite» sempre vence.
  *
  * ATENÇÃO À ARITMÉTICA DOS 2%, e isto está escrito antes de qualquer medição:
  * a calibração tem SEIS perguntas cuja decisão esperada é recusar. A menor
  * taxa não-nula possível é 1/6 = 16,7%. Não existe nada entre 0% e 16,7%.
  *
- *   Neste conjunto, «≤ 2%» significa ZERO respostas sem base. A regra parece
+ *   Nesta reserva, «≤ 2%» significa ZERO respostas sem base. A regra parece
  *   ter folga e não tem.
  *
  * Está correto assim — a intenção sempre foi tolerância zero a inventar
@@ -61,6 +79,20 @@
  * senão alguém vai achar que sobra espaço. Para que os 2% virem uma taxa de
  * verdade seriam necessárias ~50 perguntas de recusa, o que é trabalho de uma
  * reserva futura, não deste congelamento.
+ *
+ * ─────────────────────────────────────────────────────────────────────────
+ * CICLO DE VIDA DA RESERVA
+ *
+ *   congelada → calibração → limiar definido → avaliação → CONSUMIDA
+ *
+ * Depois de observadas, estas perguntas deixaram de ser desconhecidas.
+ * Qualquer recalibração futura exige uma reserva NOVA, escrita antes de ver o
+ * resultado que a motivou.
+ *
+ * E a avaliação só CONFIRMA ou REPROVA — ela não conserta. Se o limiar não
+ * generalizar, não se ajusta nada aqui: escreve-se outra reserva. É a mesma
+ * assimetria da regra do falsificador do Gemini, e existe pelo mesmo motivo —
+ * é exatamente no momento da má notícia que a tentação de reabrir aparece.
  *
  * ─────────────────────────────────────────────────────────────────────────
  * AS NOVE FAMÍLIAS
