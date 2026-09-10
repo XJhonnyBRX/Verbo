@@ -12,7 +12,8 @@
     "verify:ui": "node scripts/verify-ui.mjs",
     "shots": "node scripts/screenshot.mjs",
     "verify:schema": "node scripts/db/verify-schema.mjs",
-    "gen:counts": "node scripts/import/gen-canon-counts.mjs"
+    "gen:counts": "node scripts/import/gen-canon-counts.mjs",
+    "import:dry": "tsx scripts/import/dry-run.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -30,6 +31,7 @@
     "eslint-config-next": "16.3.4",
     "playwright": "^1.63.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^5.0.0"
   }
