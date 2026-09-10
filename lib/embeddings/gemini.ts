@@ -37,6 +37,13 @@ export interface GeminiOptions {
   titulo?: string;
 }
 
+/** Marca de erro que o chamador reconhece para parar limpo. */
+export const COTA_DIARIA = "cota diaria esgotada";
+
+/* Acima disto, a espera pedida nao e a cota por minuto. Ajustavel porque o
+   limite pago tem outro comportamento. */
+const ESPERA_MAXIMA = Number(process.env.GEMINI_MAX_ESPERA_MS ?? 120_000);
+
 interface Chave {
   valor: string;
   /** Timestamp até quando esta chave está de castigo por 429. */
@@ -130,8 +137,20 @@ export class GeminiEmbeddings implements EmbeddingProvider {
 
     for (let tentativa = 1; tentativa <= 8; tentativa++) {
       const { chave, esperar } = this.escolher();
+      if (esperar > ESPERA_MAXIMA) {
+        /* Espera longa significa cota DIARIA, nao a de minuto: a de minuto
+           pede de 15 a 45 segundos. Dormir uma hora dentro de uma geracao
+           reproduz o pior problema operacional que ja tivemos aqui - vinte
+           minutos sem sinal de vida, sem saber se esta rodando ou travado.
+           Falhar alto deixa o chamador decidir, e o progresso ja esta em
+           disco, entao retomar amanha nao custa nada. */
+        throw new Error(
+          `${COTA_DIARIA}: todas as ${this.chaves.length} chave(s) de castigo por ` +
+            `mais ${Math.round(esperar / 1000)}s`,
+        );
+      }
       if (esperar > 0) {
-        // Todas de castigo: espera a que se libera primeiro.
+        // Castigo curto: espera a chave que se libera primeiro.
         await new Promise((res) => setTimeout(res, esperar + 250));
       }
 

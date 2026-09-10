@@ -34,9 +34,11 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { adapt } from "../import/adapt-blivre";
 import { buildChunks } from "../../lib/bible/chunker";
-import { GeminiEmbeddings } from "../../lib/embeddings/gemini";
+import type { Chunk } from "../../lib/bible/chunker";
+import { COTA_DIARIA, GeminiEmbeddings } from "../../lib/embeddings/gemini";
 import { LocalEmbeddings } from "../../lib/embeddings/local";
 import type { EmbeddingProvider } from "../../lib/embeddings/types";
 import { CONSULTAS } from "./queries";
@@ -51,6 +53,11 @@ try {
 const MODELO = process.env.MODELO ?? "Supabase/gte-small";
 const DIMS = Number(process.env.DIMS ?? 768);
 const LOTE = Number(process.env.LOTE ?? 64);
+/* Caminho de um subset.json (ver scripts/embed/build-subset.ts). Quando
+   presente, o corpus vira o subconjunto NA ORDEM que o arquivo define, e os
+   vetores vao para um diretorio proprio - o corpus completo nunca e
+   sobrescrito por um parcial. */
+const SUBSET = process.env.SUBSET ?? "";
 
 function criarProvider(): EmbeddingProvider {
   if (MODELO.startsWith("gemini")) {
@@ -76,7 +83,16 @@ function criarProvider(): EmbeddingProvider {
 
 async function main(): Promise<void> {
   const provider = criarProvider();
-  const dir = path.join("data", "vectors", MODELO.replace(/[/\\]/g, "__"));
+  /* O sufixo NAO e cosmetico. Sem ele, uma geracao de subconjunto anexa seus
+     vetores ao corpus completo do mesmo modelo e produz um arquivo que e
+     metade uma coisa e metade outra -- invisivel, porque o tamanho continua
+     sendo multiplo da dimensao. Aconteceu aqui: 192 vetores do subconjunto
+     foram anexados a um prefixo de 993 do corpus inteiro. */
+  const dir = path.join(
+    "data",
+    "vectors",
+    MODELO.replace(/[/\\]/g, "__") + (SUBSET ? "__subset" : ""),
+  );
   mkdirSync(dir, { recursive: true });
 
   const arqCorpus = path.join(dir, "corpus.f32");
@@ -94,11 +110,84 @@ async function main(): Promise<void> {
       text: v.t,
     })),
   );
-  writeFileSync(path.join(dir, "chunks.json"), JSON.stringify(chunks), "utf8");
-  console.log(`chunks : ${chunks.length.toLocaleString("pt-BR")}`);
+  let corpus = chunks;
+  if (SUBSET) {
+    const sub = JSON.parse(readFileSync(SUBSET, "utf8")) as {
+      indices: number[];
+      camadas: Record<string, number>;
+    };
+    corpus = sub.indices.map((i) => chunks[i]);
+    console.log(
+      `subset : ${corpus.length} de ${chunks.length} - ` +
+        Object.entries(sub.camadas)
+          .map(([k, v]) => `${k} ${v}`)
+          .join(", "),
+    );
+  }
+
+  /* IDENTIDADE DO CORPUS — a guarda que faltava.
+   *
+   * corpus.f32 e uma sequencia crua de floats: 993 vetores de um corpus sao
+   * indistinguiveis de 993 vetores de outro, e a checagem de retomada so
+   * conferia se o tamanho e multiplo da dimensao. Aconteceu o previsivel:
+   * uma geracao de subconjunto retomou um arquivo do corpus completo,
+   * tratou 993 vetores de Genesis como se fossem as primeiras 993 entradas
+   * do subconjunto, e produziu um arquivo que era metade de cada coisa. Sem
+   * nenhum sinal de erro, porque nao havia nada que pudesse notar.
+   *
+   * A impressao digital e do CONTEUDO, nao da contagem: dois corpora podem
+   * ter o mesmo tamanho e textos diferentes. */
+  const impressao = createHash("sha256")
+    .update(corpus.map((c) => `${c.osis} ${c.chapter}:${c.verseStart}-${c.verseEnd}`).join("|"))
+    .digest("hex");
+  const arqId = path.join(dir, "corpus.id");
+
+  if (existsSync(arqId)) {
+    const gravada = readFileSync(arqId, "utf8").trim();
+    if (gravada !== impressao) {
+      console.error(
+        `\n${dir} contem vetores de OUTRO corpus.\n` +
+          `  gravado : ${gravada.slice(0, 16)}…\n` +
+          `  atual   : ${impressao.slice(0, 16)}…\n` +
+          "Retomar aqui misturaria dois corpora num arquivo so. Apague o " +
+          "diretorio, ou gere em outro.",
+      );
+      process.exit(1);
+    }
+  } else if (existsSync(arqCorpus)) {
+    /* Diretorio de antes desta guarda existir. A identidade nao esta gravada,
+       mas E demonstravel: o chunks.json ao lado diz a que corpus os vetores
+       pertencem. Recalcular dali e adotar e honesto; adivinhar nao seria. */
+    const antigo = path.join(dir, "chunks.json");
+    if (!existsSync(antigo)) {
+      console.error(
+        `\n${dir} tem corpus.f32, mas nem corpus.id nem chunks.json.\n` +
+          "  Nao da para provar a que corpus ele pertence. Apague e gere de novo.",
+      );
+      process.exit(1);
+    }
+    const salvos = JSON.parse(readFileSync(antigo, "utf8")) as Chunk[];
+    const digital = createHash("sha256")
+      .update(salvos.map((c) => `${c.osis} ${c.chapter}:${c.verseStart}-${c.verseEnd}`).join("|"))
+      .digest("hex");
+    if (digital !== impressao) {
+      console.error(
+        `\n${dir} guarda vetores de OUTRO corpus (${salvos.length} chunks).\n` +
+          "  Retomar aqui misturaria dois corpora. Apague o diretorio, ou gere em outro.",
+      );
+      process.exit(1);
+    }
+    writeFileSync(arqId, impressao, "utf8");
+    console.log("identidade recuperada do chunks.json existente");
+  } else {
+    writeFileSync(arqId, impressao, "utf8");
+  }
+
+  writeFileSync(path.join(dir, "chunks.json"), JSON.stringify(corpus), "utf8");
+  console.log(`chunks : ${corpus.length.toLocaleString("pt-BR")}  id ${impressao.slice(0, 12)}`);
 
   // Descobre a dimensão embedando um texto — não presume a partir do nome.
-  const amostra = await provider.embedDocuments([chunks[0].content]);
+  const amostra = await provider.embedDocuments([corpus[0].content]);
   const dims = amostra[0].length;
   console.log(`dims   : ${dims}`);
 
@@ -114,7 +203,7 @@ async function main(): Promise<void> {
       process.exit(1);
     }
     jaFeitos = bytes / (dims * 4);
-    if (jaFeitos > chunks.length) {
+    if (jaFeitos > corpus.length) {
       console.error("corpus.f32 tem mais vetores que chunks. Apague e refaça.");
       process.exit(1);
     }
@@ -132,8 +221,8 @@ async function main(): Promise<void> {
   const t0 = Date.now();
   const partida = jaFeitos;
 
-  for (let i = jaFeitos; i < chunks.length; i += LOTE) {
-    const fatia = chunks.slice(i, i + LOTE);
+  for (let i = jaFeitos; i < corpus.length; i += LOTE) {
+    const fatia = corpus.slice(i, i + LOTE);
     const vs = await provider.embedDocuments(fatia.map((c) => c.content));
 
     // Anexa no fim: o arquivo é sempre um prefixo válido do resultado.
@@ -148,14 +237,14 @@ async function main(): Promise<void> {
       modelo: provider.model,
       dims,
       feitos,
-      total: chunks.length,
+      total: corpus.length,
       porSegundo: Math.round(ritmo * 10) / 10,
-      faltamSegundos: Math.round((chunks.length - feitos) / (ritmo || 1)),
+      faltamSegundos: Math.round((corpus.length - feitos) / (ritmo || 1)),
       atualizadoEm: new Date().toISOString(),
     };
     writeFileSync(arqProgresso, JSON.stringify(progresso, null, 2), "utf8");
     console.log(
-      `${feitos}/${chunks.length}  ${progresso.porSegundo}/s  ` +
+      `${feitos}/${corpus.length}  ${progresso.porSegundo}/s  ` +
         `faltam ~${progresso.faltamSegundos}s`,
     );
   }
@@ -182,17 +271,17 @@ async function main(): Promise<void> {
    *   geracaoSegundos   tempo gasto embedando, null se não gerou nada
    *   porSegundo        ritmo, null quando não há geração para medir
    */
-  const gerados = chunks.length - partida;
+  const gerados = corpus.length - partida;
   const meta = {
     modelo: provider.model,
     dims,
-    chunks: chunks.length,
+    chunks: corpus.length,
     consultas: CONSULTAS.length,
     vetoresGerados: gerados,
     vetoresRetomados: partida,
     geracaoSegundos: gerados > 0 ? Math.round(segundos) : null,
     porSegundo: gerados > 0 ? Math.round(gerados / segundos) : null,
-    execucaoCompleta: gerados === chunks.length - 1 || partida <= 1,
+    execucaoCompleta: gerados === corpus.length - 1 || partida <= 1,
     geradoEm: new Date().toISOString(),
   };
 
@@ -210,7 +299,20 @@ async function main(): Promise<void> {
 }
 
 main().catch((e: unknown) => {
-  console.error(`falhou: ${(e as Error).message}`);
+  const msg = (e as Error).message;
+
+  /* Cota diaria esgotada nao e defeito: e o fim do orcamento do dia. Sai
+     com zero para nao poluir o log de CI nem assustar quem so quer saber se
+     deu certo -- e diz exatamente o que fazer amanha. */
+  if (msg.includes(COTA_DIARIA)) {
+    console.log(`
+cota diaria esgotada. ${msg}`);
+    console.log("os vetores gerados ate aqui estao em disco e sao um prefixo");
+    console.log("valido do corpus. Rodar o mesmo comando amanha retoma dali.");
+    process.exit(0);
+  }
+
+  console.error(`falhou: ${msg}`);
   console.error("o progresso parcial foi mantido; rodar de novo retoma dali");
   process.exit(1);
 });
