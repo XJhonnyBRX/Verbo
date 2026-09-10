@@ -53,10 +53,28 @@ export class GeminiEmbeddings implements EmbeddingProvider {
     this.titulo = titulo;
   }
 
+  /**
+   * Espera o tempo que a PRÓPRIA API pediu.
+   *
+   * Medido: o free tier permite 100 requisições de embedding por minuto, e
+   * quando estoura a resposta traz «Please retry in 42.499928451s». Backoff
+   * exponencial nosso, começando em 500ms, chegaria a 8s depois de cinco
+   * tentativas — nem perto. O processo morria em 193 de 15.246.
+   *
+   * A regra: se a API disse quanto esperar, espere aquilo.
+   */
+  private static esperaPedida(corpo: string): number | null {
+    const m = /retry in ([\d.]+)s/i.exec(corpo);
+    if (m) return Math.ceil(Number(m[1]) * 1000) + 500;
+    const j = /"retryDelay"\s*:\s*"([\d.]+)s"/i.exec(corpo);
+    if (j) return Math.ceil(Number(j[1]) * 1000) + 500;
+    return null;
+  }
+
   private async chamar(texto: string): Promise<Float32Array> {
     let ultimoErro = "";
 
-    for (let tentativa = 1; tentativa <= 5; tentativa++) {
+    for (let tentativa = 1; tentativa <= 8; tentativa++) {
       const r = await fetch(ENDPOINT, {
         method: "POST",
         headers: {
@@ -78,10 +96,13 @@ export class GeminiEmbeddings implements EmbeddingProvider {
         return normalizar(new Float32Array(valores));
       }
 
-      ultimoErro = `${r.status} ${await r.text()}`;
-      // 429 = cota, 5xx = instável. Ambos merecem nova tentativa.
+      const corpo = await r.text();
+      ultimoErro = `${r.status} ${corpo.slice(0, 200)}`;
+
       if (r.status === 429 || r.status >= 500) {
-        await new Promise((res) => setTimeout(res, 500 * 2 ** (tentativa - 1)));
+        const pedida = GeminiEmbeddings.esperaPedida(corpo);
+        const espera = pedida ?? Math.min(1000 * 2 ** (tentativa - 1), 60_000);
+        await new Promise((res) => setTimeout(res, espera));
         continue;
       }
       break;
@@ -94,17 +115,43 @@ export class GeminiEmbeddings implements EmbeddingProvider {
     return this.chamar(`task: search result | query: ${text}`);
   }
 
+  /**
+   * Estrangula ANTES de bater na cota, em vez de bater e se recuperar.
+   *
+   * Medido no free tier: 100 requisições de embedding por minuto. Correr até
+   * o limite e absorver o 429 desperdiça a chamada e ainda impõe uma espera
+   * de 42 segundos. Manter o ritmo abaixo do teto é mais rápido no total,
+   * além de mais educado com a API.
+   *
+   * `GEMINI_RPM` permite subir isso quando houver faturamento ativo — o
+   * limite pago é muito maior.
+   */
+  private readonly rpm = Number(process.env.GEMINI_RPM ?? 95);
+  private janela: number[] = [];
+
+  private async aguardarVaga(): Promise<void> {
+    const agora = Date.now();
+    this.janela = this.janela.filter((t) => agora - t < 60_000);
+    if (this.janela.length >= this.rpm) {
+      const espera = 60_000 - (agora - this.janela[0]) + 100;
+      await new Promise((r) => setTimeout(r, espera));
+      return this.aguardarVaga();
+    }
+    this.janela.push(Date.now());
+  }
+
   async embedDocuments(texts: string[]): Promise<Float32Array[]> {
-    // A API embeda um conteúdo por requisição; a concorrência é o que dá
-    // vazão. Quatro em paralelo é conservador o bastante para não bater em
-    // cota e rápido o bastante para 15 mil chunks.
-    const CONCORRENCIA = 4;
     const saida: Float32Array[] = new Array<Float32Array>(texts.length);
+    // Concorrência baixa: o gargalo é a cota por minuto, não a latência.
+    const CONCORRENCIA = 4;
 
     for (let i = 0; i < texts.length; i += CONCORRENCIA) {
       const grupo = texts.slice(i, i + CONCORRENCIA);
       const vs = await Promise.all(
-        grupo.map((t) => this.chamar(`title: ${this.titulo} | text: ${t}`)),
+        grupo.map(async (t) => {
+          await this.aguardarVaga();
+          return this.chamar(`title: ${this.titulo} | text: ${t}`);
+        }),
       );
       vs.forEach((v, j) => (saida[i + j] = v));
     }

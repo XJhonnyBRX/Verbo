@@ -41,6 +41,13 @@ import { LocalEmbeddings } from "../../lib/embeddings/local";
 import type { EmbeddingProvider } from "../../lib/embeddings/types";
 import { CONSULTAS } from "./queries";
 
+// Chaves vivem em .env.local, que o tsx não carrega sozinho.
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // Sem .env.local: só os modelos locais funcionam, e eles não precisam dela.
+}
+
 const MODELO = process.env.MODELO ?? "Supabase/gte-small";
 const DIMS = Number(process.env.DIMS ?? 768);
 const LOTE = Number(process.env.LOTE ?? 64);
