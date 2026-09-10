@@ -150,6 +150,42 @@ descobrir quanto o embedding sozinho entrega.
 
 ---
 
+## Restrição de arquitetura: a cota é compartilhada
+
+Medido no free tier do `gemini-embedding-2`: **100 requisições de embedding
+por minuto**, métrica `embed_content_free_tier_requests`. Ao estourar, a
+resposta traz «Please retry in 42.499928451s».
+
+O ponto não é o número. É que **os dois caminhos dividem a mesma cota**:
+
+```
+ingestão   → 15.246 chunks, uma vez        ─┐
+                                            ├── mesma cota de 100/min
+consulta   → 1 embedding por pergunta      ─┘   (no free tier)
+```
+
+**E os dois custos são de naturezas diferentes**, o que muda o peso de cada
+um na decisão:
+
+| | Natureza | Frequência | Peso na decisão |
+|---|---|---|---|
+| Ingestão dos chunks | custo de implantação | uma vez por tradução | **baixo** |
+| Embedding da pergunta | custo operacional | toda pergunta, para sempre | **alto** |
+
+Duas horas para embedar a Bíblia é irrelevante: acontece uma vez. Cem
+perguntas por minuto **no app inteiro, somando todos os usuários**, é outra
+coisa — e é o número que decide.
+
+Para um beta de 50 a 100 pessoas, provavelmente basta. Para crescimento, não.
+Então a pergunta de aprovação do Gemini não é «é melhor?», e sim:
+
+> **é melhor o suficiente para justificar uma dependência de API paga no
+> caminho crítico de toda pergunta do usuário?**
+
+O e5 não tem esse problema: roda local, sem cota e sem custo por chamada. Ele
+paga em qualidade; o Gemini paga em dependência operacional. A decisão é entre
+esses dois preços, não entre duas notas.
+
 ## Critério de aprovação do Gemini — registrado ANTES de medir
 
 Escrito enquanto o resultado ainda é desconhecido, de propósito. Critério
